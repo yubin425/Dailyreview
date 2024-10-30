@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 @Model
+class Review{
     var type: String
     
     init(type: String) {
