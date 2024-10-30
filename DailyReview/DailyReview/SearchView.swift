@@ -24,7 +24,7 @@ struct ContentView: View {
         }
         .searchable(text: $searchText) // Adds a search field.
         
-        .padding(.top, 325.0)
+        .padding(.top, 0)
     }
 }
 

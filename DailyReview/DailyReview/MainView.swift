@@ -11,20 +11,29 @@ import UIKit
 
 class HighlightingCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
     var collectionView: UICollectionView!
-    let posters = ["poster1", "poster2", "poster3"]
+    let posters = ["poster1", "poster2", "poster3", "poster4", "poster5"]
     override func viewDidLoad() { super.viewDidLoad()
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.minimumLineSpacing = 10
+        layout.minimumLineSpacing = 15
+        
         collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: layout)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(PosterCell.self, forCellWithReuseIdentifier: "PosterCell")
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = .black
         collectionView.decelerationRate = .fast
         collectionView.showsHorizontalScrollIndicator = false
         
         self.view.addSubview(collectionView)
+        
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            collectionView.heightAnchor.constraint(equalToConstant: 600)
+        ])
         
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -32,16 +41,21 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PosterCell", for: indexPath) as! PosterCell
-        cell.imageView.image = UIImage(named: posters[indexPath.item])
+        if let imageView = cell.contentView.subviews.first as? UIImageView {
+            imageView.image = UIImage(named: posters[indexPath.item])
+        }
         return cell
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width * 0.7, height: collectionView.frame.height * 0.8) }
+    
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
             let centerX = scrollView.contentOffset.x + scrollView.frame.size.width / 2
         for cell in
             collectionView.visibleCells {
-            let offset = abs(cell.center.x - centerX)
+            let offset = abs(cell.center.x - centerX
+            )
             let scale = max(0.85, 1 - offset / scrollView.frame.size.width)
             cell.transform = CGAffineTransform(scaleX: scale, y: scale) } }
 }
@@ -62,7 +76,56 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
                 imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ]) }
         required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") } }
+ 
+struct SearchResultsView: View {
+    var body: some View {
+        VStack {
+            Text("This is the Search Results view")
+                .padding()
+            Spacer()
+        }
+        .navigationTitle("Search Results")
+    }
+}
+
+struct HighlightingCollectionView: UIViewControllerRepresentable {
     
+    @State private var searchText = ""
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                TextField("Search...", text: $searchText)
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
+                    .onTapGesture {
+                        ContentView()
+                    }
+                NavigationLink(destination: SearchResultsView())
+                {
+                    Text("Search")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                }
+                .padding()
+                Spacer()
+            }
+            .navigationTitle("Search")
+        }
+    }
+    
+    func makeUIViewController(context: Context) -> HighlightingCollectionViewController {
+        return HighlightingCollectionViewController()
+    }
+    func updateUIViewController(_ uiViewController: HighlightingCollectionViewController, context: Context) {} }
+struct HighlightingCollectionView_Previews: PreviewProvider {
+    static var previews: some View { HighlightingCollectionView() .edgesIgnoringSafeArea(.all)
+    }
+}
 struct MainView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
@@ -111,6 +174,7 @@ struct MainView: View {
 }
 
 #Preview {
+    
     MainView()
         .modelContainer(for: Item.self, inMemory: true)
 }
