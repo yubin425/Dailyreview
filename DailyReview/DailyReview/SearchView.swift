@@ -23,5 +23,13 @@ struct ContentView: View {
             //ProductDetails(productId: productId)
         }
         .searchable(text: $searchText) // Adds a search field.
+        
+        .padding(.top, 325.0)
     }
 }
+
+#Preview {
+    ContentView()
+}
+
+
