@@ -6,6 +6,15 @@
 //
 
 import SwiftUI
+import SwiftData
+
+@Model
+    var type: String
+    
+    init(type: String) {
+        self.type = type
+    }
+}
 
 struct ReviewView: View {
     var body: some View {
