@@ -44,7 +44,7 @@ struct ReviewView: View {
                                         Spacer()
                                         
                                         VStack {
-                                            Text("영화 제목\n영화 출연진들의 이름\n영화 줄거리를 요약해서 적으면 좋을 것 같습니다 영화 줄거리를 요약해서 적으면 좋을 것 같습니다")
+                                            Text("영화 제목\n영화 출연진들의 이름\n영화 줄거리를 요약\n현재는 날짜 피커가 이 안에 있는데, 저 밑에 영화 개봉일시와 장르 태그를 적고 날짜피커는 밑으로 빼도 괜찮을 것 같습니다")
                                                 .foregroundColor(.black)
                                                 .multilineTextAlignment(.center)
                                                 .padding(.bottom, 5)
