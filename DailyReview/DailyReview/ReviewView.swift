@@ -22,37 +22,57 @@ struct ReviewView: View {
     @State private var rating = 1
 
     var body: some View {
-        VStack {
-            // Placeholder for movie poster and info with rating stars
-            VStack {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(height: 300)
-                    .overlay(
-                        VStack {
-                            Text("영화 포스터, 영화 정보(제목, 출연진)\n출력란")
-                                .foregroundColor(.gray)
-                                .multilineTextAlignment(.center)
-                            HStack {
-                                ForEach(1...5, id: \.self) { index in
-                                    Image(systemName: index <= rating ? "star.fill" : "star")
-                                        .resizable()
-                                        .frame(width: 30, height: 30)
-                                        .foregroundColor(index <= rating ? .yellow : .gray)
-                                        .onTapGesture {
-                                            rating = index
-                                        }
+        GeometryReader { geometry in
+                    VStack {
+                        Image("testImage")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width, height: 300)
+                            .clipped()
+                            .overlay(Color.white.opacity(0.7))
+                            .overlay(
+                                HStack{
+                                    Image("testImage")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 150)
+                                    .padding(.horizontal)
+                                    Spacer()
+                                    
+                                    VStack {
+                                        Text("영화 포스터, 영화 정보(제목, 출연진)\n출력란\n일시,위치,좌석 적는란 추가 필요")
+                                            .foregroundColor(.black)
+                                            .multilineTextAlignment(.center)
+                                            .padding(.bottom, 10)
+                                        
+                                        HStack {
+                                            ForEach(1...5, id: \.self) { index in
+                                                Image(systemName: index <= rating ? "star.fill" : "star")
+                                                    .resizable()
+                                                    .frame(width: 30, height: 30)
+                                                    .foregroundColor(index <= rating ? .yellow : .black)
+                                                    .onTapGesture {
+                                                        rating = index
+                                                    }
+                                            }
+                                        } //여기까지 별점 Hstack
+                                        .padding(.top, 10) // 텍스트-별점 사이 여백
+                                    } //여기까지 별점&텍스트 vstack
+                                    .padding(.horizontal)
                                 }
-                            }
-                            .padding(.top, 10) // Add some spacing between text and stars
-                        }
-                    )
-            }
-            .padding(.horizontal)
-            
-            // Review TextField Area
+                                
+                            )
+                          
+
+                    }
+                }
+        .background(Color.white.opacity(0.3))
+             .padding(.vertical)
+                .frame(height: 300)
+        VStack {
+
             VStack {
-                Text("리뷰 작성하기")
+                Text("리뷰 작성")
                     .foregroundColor(.gray)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 TextEditor(text: $reviewText)
@@ -63,7 +83,7 @@ struct ReviewView: View {
                     )
                     .padding(.bottom, 20)
             }
-            .padding(.horizontal)
+            
             
             Spacer()
             
