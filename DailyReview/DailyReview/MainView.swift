@@ -124,13 +124,13 @@ struct MainView: View {
         ZStack {
             VStack(spacing: 0) {
                 Color.white
-                    .frame(height: 100) // Top white section
+                    .frame(height: 100)
                 
                 Color.black
-                    .frame(height: 650) // Middle black section
+                    .frame(height: 650)
                 
                 Color.white
-                    .frame(height: 100) // Bottom white section
+                    .frame(height: 100)
             }
             
             VStack {
@@ -143,7 +143,7 @@ struct MainView: View {
                     .cornerRadius(8)
                     .padding(.horizontal)
                     .onTapGesture {
-                        // This triggers the navigation
+                        // 검색창
                     }
                 
                 VStack(spacing: 10) {
@@ -221,7 +221,7 @@ struct MainView: View {
                 }
                 .padding(.bottom, 20)
             }
-            .edgesIgnoringSafeArea(.all) // Extend to edges for background colors
+            .edgesIgnoringSafeArea(.all)
         }
     }
 }
