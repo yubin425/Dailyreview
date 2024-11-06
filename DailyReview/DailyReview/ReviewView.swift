@@ -2,16 +2,22 @@ import SwiftUI
 import SwiftData
 
 @Model
-class Review {
+class Review: ObservableObject{
     var id: UUID = UUID()
     var movieTitle: String
     var reviewText: String
     var rating: Int
+    var watchDate: Date
+    var watchLocation: String
+    var friends: String
     
-    init(movieTitle: String, reviewText: String, rating: Int) {
+    init(movieTitle: String, reviewText: String, rating: Int, watchDate: Date, watchLocation: String, friends: String) {
         self.movieTitle = movieTitle
         self.reviewText = reviewText
         self.rating = rating
+        self.watchDate = watchDate
+        self.watchLocation = watchLocation
+        self.friends = friends
     }
 }
 
@@ -23,7 +29,8 @@ struct ReviewView: View {
     @State private var watchDate = Date()
     @State private var watchLocation = ""
     @State private var friends = ""
-
+    
+    @State private var showReviewField = false // 리뷰 입력창 표시 여부
 
     var body: some View {
         GeometryReader { geometry in
@@ -44,7 +51,7 @@ struct ReviewView: View {
                                         Spacer()
                                         
                                         VStack {
-                                            Text("영화 제목\n영화 출연진들의 이름\n영화 줄거리를 요약\n현재는 날짜 피커가 이 안에 있는데, 저 밑에 영화 개봉일시와 장르 태그를 적고 날짜피커는 밑으로 빼도 괜찮을 것 같습니다")
+                                            Text("영화 제목\n개봉 연도\n영화 줄거리를 요약하는 란\n영화 줄거리를 요약하는 란")
                                                 .foregroundColor(.black)
                                                 .multilineTextAlignment(.center)
                                                 .padding(.bottom, 5)
@@ -67,23 +74,12 @@ struct ReviewView: View {
                                     
                                     HStack {
                                     
-                                        // 날짜 입력란
-                                        HStack {
-                                            Text("📅")
-                                            DatePicker("", selection: $watchDate, displayedComponents: .date)
-                                            .datePickerStyle(CompactDatePickerStyle()) // 날짜 선택기 스타일
-                                            .labelsHidden() // 라벨 숨기기
-                                                        
-                                                    }
-                                        Spacer()
+                                    // 날짜 입력란
+                                    Text("출연진: 누구,누구누구,...")
+
+                                    Spacer()
                                                     
-                                        // 위치 입력란
-                                        HStack {
-                                            Text("📍")
-                                            TextField("영화를 본 위치", text: $watchLocation)
-                                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                                .frame(maxWidth: .infinity) // 가로를 꽉 차게
-                                        }
+                                    Text("#호러 #오컬트 #뭐뭐")
                                                    
                                                 } //여기까지 hstack
                                     .padding(.horizontal)
@@ -93,8 +89,6 @@ struct ReviewView: View {
                             
                                 
                             )
-                          
-
                     }
                 }
         .background(Color.white.opacity(0.3))
@@ -116,14 +110,47 @@ struct ReviewView: View {
                             .frame(maxWidth: .infinity) // 가로를 꽉 차게
                     }
                         }
-                TextEditor(text: $reviewText)
-                    .frame(height: 300)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                    )
-                    .padding(.bottom, 20)
-            }
+                HStack {
+                
+                    // 날짜 입력란
+                    HStack {
+                        Text("📅")
+                        DatePicker("", selection: $watchDate, displayedComponents: .date)
+                        .datePickerStyle(CompactDatePickerStyle()) // 날짜 선택기 스타일
+                        .labelsHidden() // 라벨 숨기기
+                                    
+                                }
+                    Spacer()
+                                
+                    // 위치 입력란
+                    HStack {
+                        Text("📍")
+                        TextField("영화를 본 위치", text: $watchLocation)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(maxWidth: .infinity) // 가로를 꽉 차게
+                    }
+                               
+                            } //여기까지 hstack
+                .padding(.horizontal)
+                .padding(.top, 5)
+                VStack {
+                           // +상세 리뷰 추가 버튼
+                           Button(action: {
+                               withAnimation {
+                                   showReviewField.toggle() // 버튼을 누르면 표시 여부 토글
+                               }
+                           }) {
+                               Text(showReviewField ? "리뷰 닫기" : "+상세 리뷰 추가")
+                                   .foregroundColor(.blue)
+                                   .padding()
+                           }
+                           .sheet(isPresented: $showReviewField) {
+                               ReviewTextEditorView(reviewText: $reviewText)// 모달로 표시될 뷰
+                           }
+
+                       }
+                       .padding()
+                   }
             
             
             Spacer()
@@ -131,7 +158,7 @@ struct ReviewView: View {
             // Save and Cancel Buttons
             HStack {
                 Button("등록") {
-                    let newReview = Review(movieTitle: movieTitle, reviewText: reviewText, rating: rating)
+                    let newReview = Review(movieTitle: movieTitle, reviewText: reviewText, rating: rating, watchDate: watchDate, watchLocation: watchLocation, friends: friends)
                     modelContext.insert(newReview)
                     movieTitle = ""
                     reviewText = ""
