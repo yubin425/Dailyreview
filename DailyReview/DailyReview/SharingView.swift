@@ -12,6 +12,25 @@ struct SharingView: View {
 
     var body: some View {
         VStack {
+            
+            if let screenshotImage = screenshotImage {
+                Image(uiImage: screenshotImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: 300)
+                    .padding()
+            }
+            
+            else {
+                Image("poster1")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: 300)
+                    .padding()
+            }
+            
+            
+            
             Button(action: {
                 takeScreenshot()
             }) {
@@ -22,19 +41,9 @@ struct SharingView: View {
                     .cornerRadius(8)
             }
 
-            Image("poster1")
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity, maxHeight: 300)
-                .padding()
             
-            if let screenshotImage = screenshotImage {
-                Image(uiImage: screenshotImage)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: 300)
-                    .padding()
-            }
+            
+            
         }
     }
 
