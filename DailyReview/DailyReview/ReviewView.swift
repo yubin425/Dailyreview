@@ -1,18 +1,21 @@
 import SwiftUI
 import SwiftData
 
+
 @Model
-class Review: ObservableObject{
+class Review: ObservableObject {
     var id: UUID = UUID()
     var movieTitle: String
+    var moviePoster: String  // 영화 포스터 이미지 이름
     var reviewText: String
     var rating: Int
     var watchDate: Date
     var watchLocation: String
     var friends: String
     
-    init(movieTitle: String, reviewText: String, rating: Int, watchDate: Date, watchLocation: String, friends: String) {
+    init(movieTitle: String, moviePoster: String, reviewText: String, rating: Int, watchDate: Date, watchLocation: String, friends: String) {
         self.movieTitle = movieTitle
+        self.moviePoster = moviePoster
         self.reviewText = reviewText
         self.rating = rating
         self.watchDate = watchDate
@@ -24,6 +27,7 @@ class Review: ObservableObject{
 struct ReviewView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var movieTitle = ""
+    @State private var moviePoster = ""
     @State private var reviewText = ""
     @State private var rating = 1
     @State private var watchDate = Date()
@@ -31,6 +35,8 @@ struct ReviewView: View {
     @State private var friends = ""
     
     @State private var showReviewField = false // 리뷰 입력창 표시 여부
+    
+    let movie: Movie  // DetailView에서 전달받은 영화 정보
 
     var body: some View {
         GeometryReader { geometry in
@@ -158,9 +164,10 @@ struct ReviewView: View {
             // Save and Cancel Buttons
             HStack {
                 Button("등록") {
-                    let newReview = Review(movieTitle: movieTitle, reviewText: reviewText, rating: rating, watchDate: watchDate, watchLocation: watchLocation, friends: friends)
+                    let newReview = Review(movieTitle: movieTitle, moviePoster: moviePoster, reviewText: reviewText, rating: rating, watchDate: watchDate, watchLocation: watchLocation, friends: friends)
                     modelContext.insert(newReview)
                     movieTitle = ""
+                    moviePoster = ""
                     reviewText = ""
                     rating = 1
                     watchDate = Date()
@@ -176,6 +183,7 @@ struct ReviewView: View {
                 
                 Button("취소") {
                     movieTitle = ""
+                    moviePoster = ""
                     reviewText = ""
                     rating = 1
                     watchDate = Date()
@@ -194,6 +202,6 @@ struct ReviewView: View {
     }
 }
 
-#Preview {
-    ReviewView()
-}
+//#Preview {
+    //ReviewView()
+//}
