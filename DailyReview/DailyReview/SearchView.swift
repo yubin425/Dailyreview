@@ -11,22 +11,26 @@ struct SearchView: View {
     var body: some View {
         NavigationView {
             VStack {
+                // 검색 창
                 HStack{
-                    Picker("검색 자료", selection: $filter){
+                    // 검색 기준
+                    Picker("검색 기준", selection: $filter){
                         ForEach(filters, id: \.self){
                             Text($0)
                         }
                     }
                     .pickerStyle(.menu)
-                    .onChange(of: filter){
+                    .onChange(of: filter){ _ in
                         query = ""
                     }
                     
+                    // 검색 Query
                     TextField("\(filter) 검색", text: $query)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
                         .submitLabel(.search)
                     
+                    // 검색 버튼
                     Button(action: {
                         viewModel.fetchMovies(filter: filter, query: query)
                     }) {
@@ -36,41 +40,43 @@ struct SearchView: View {
                     }
                 }
                 
-                List(viewModel.movies) { movieDetail in
-                    HStack{
-                        if let posterURL = movieDetail.movie.poster,
-                           let url = URL(string: posterURL.replacingOccurrences(of: "http://", with: "https://")){
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .empty:
-                                    ProgressView()
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 50, height: 75)
-                                case .failure:
-                                    Image(systemName: "photo")
-                                @unknown default:
-                                    EmptyView()
+                // 검색 결과
+                List(viewModel.movies) { theMovie in
+                    NavigationLink(destination: DetailView(movie: theMovie)){
+                        HStack{
+                            // 포스터
+                            if let posterURL = theMovie.poster,
+                               let url = URL(string: posterURL){
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView()
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 50, height: 75)
+                                    case .failure:
+                                        Image(systemName: "photo")
+                                    @unknown default:
+                                        EmptyView()
+                                    }
                                 }
+                            } else{
+                                Image(systemName: "photo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50, height: 75)
                             }
-                        } else{
-                            Image(systemName: "photo")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50, height: 75)
+                            
+                            // 정보
+                            VStack(alignment: .leading) {
+                                Text(theMovie.title)
+                                    .font(.headline)
+                                Text("감독: \(theMovie.director.prefix(3).joined(separator: ", "))")
+                                Text("개봉일: \(theMovie.releaseYear ?? "정보 없음")")
+                            }
                         }
-                        
-                        VStack(alignment: .leading) {
-                            Text(movieDetail.movie.title)
-                                .font(.headline)
-                            Text("감독: \(movieDetail.movie.director.prefix(3).joined(separator: ", "))")
-                            Text("개봉일: \(movieDetail.movie.releaseDate ?? "정보 없음")")
-                        }
-                    }
-                    .onTapGesture {
-                        print(movieDetail.plotText!)
                     }
                 }
             }

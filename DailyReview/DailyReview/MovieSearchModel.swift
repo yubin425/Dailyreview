@@ -3,10 +3,15 @@ import Foundation
 import Combine
 
 class MovieSearchModel: ObservableObject {
-    @Published var movies = [MovieDetail]()
+    @Published var movies = [Movie]()
     private var cancellable: AnyCancellable?
     private let apiKey = "XC592QN1I4K1F8OAM2T0"
-    private let filterDict:[String:String] = ["영화":"title", "감독":"director", "배우":"actor", "키워드":"keyword"]
+    private let filterDict:[String:String] = [
+        "영화":"title",
+        "감독":"director",
+        "배우":"actor",
+        "키워드":"keyword"
+    ]
 
     func fetchMovies(filter: String, query: String) {
         let urlString = "https://api.koreafilm.or.kr/openapi-data2/wisenut/search_api/search_json2.jsp?collection=kmdb_new2&\(filterDict[filter]!)=\(query)&ServiceKey=\(apiKey)&detail=Y"
@@ -18,8 +23,7 @@ class MovieSearchModel: ObservableObject {
             .handleEvents(receiveOutput: { data in
                 // JSON 데이터를 문자열로 출력하여 응답을 확인
                 if let jsonString = String(data: data, encoding: .utf8) {
-                    print()
-                    //print("JSON Response: \(jsonString)") // JSON 데이터 출력
+                    print("JSON Response: \(jsonString)") // JSON 데이터 출력
                 }
             })
             .decode(type: MovieResponse.self, decoder: JSONDecoder())
@@ -41,5 +45,5 @@ struct MovieResponse: Decodable {
 }
 
 struct MovieData: Decodable {
-    let Result: [MovieDetail]
+    let Result: [Movie]
 }
