@@ -37,11 +37,18 @@ struct ReviewView: View {
     @State private var showReviewField = false // 리뷰 입력창 표시 여부
     
     let movie: Movie  // DetailView에서 전달받은 영화 정보
+    private var Tags: String {
+        let genreTags = movie.genre.prefix(2).map { "#\($0)" }
+        let keywordTag = movie.keyword.prefix(1).map { "#\($0)" }
+        return (genreTags + keywordTag).joined(separator: " ")
+    }
 
+ 
     var body: some View {
         GeometryReader { geometry in
                     VStack {
-                        Image("testImage")                            .resizable()
+                        Image("testImage")
+                            .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(width: geometry.size.width, height: 300)
                             .clipped()
@@ -57,11 +64,14 @@ struct ReviewView: View {
                                         Spacer()
                                         
                                         VStack {
-                                            Text("영화 제목\n개봉 연도\n영화 줄거리를 요약하는 란\n영화 줄거리를 요약하는 란")
+                                            Text("\(movie.title)")
+                                                .font(.title)
                                                 .foregroundColor(.black)
                                                 .multilineTextAlignment(.center)
                                                 .padding(.bottom, 5)
-                                            
+                                            Text("\(String(movie.director.first ?? "null")),\(String(movie.releaseYear ?? "null"))")
+                                            Text("\(String(movie.plotText ?? "null"))")
+                                                .multilineTextAlignment(.center)
                                                                  
                                             HStack {
                                                 ForEach(1...5, id: \.self) { index in
@@ -79,15 +89,16 @@ struct ReviewView: View {
                                     }//여기까지 포스터가 속한 hstack
                                     
                                     HStack {
-                                    
-                                    // 날짜 입력란
-                                    Text("출연진: 누구,누구누구,...")
-
-                                    Spacer()
-                                                    
-                                    Text("#호러 #오컬트 #뭐뭐")
-                                                   
-                                                } //여기까지 hstack
+                                        Text("출연자:\(String(movie.director.first ?? "null"))")
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                        
+                                        Spacer()
+                                        
+                                        Text(Tags)
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                    } //여기까지 hstack
                                     .padding(.horizontal)
                                     .padding(.top, 5)
                            
@@ -202,6 +213,16 @@ struct ReviewView: View {
     }
 }
 
-//#Preview {
-    //ReviewView()
-//}
+#Preview {
+    let dummyMovie = Movie(
+               title: "Dummy Movie Title",
+               director: ["John Doe"],
+               releaseYear: "2023",
+               poster: nil,
+               still: nil,
+               genre: ["Drama", "Thriller"],
+               keyword: ["Suspense", "Mystery"],
+               plotText: "A thrilling tale of suspense and mystery."
+           )
+    ReviewView(movie: dummyMovie)
+}

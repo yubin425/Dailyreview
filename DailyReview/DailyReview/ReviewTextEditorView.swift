@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ReviewTextEditorView: View {
     @Binding var reviewText: String
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         Text("상세 리뷰 작성")
         GeometryReader { geometry in
@@ -23,15 +25,8 @@ struct ReviewTextEditorView: View {
             }
         }
         .padding(.horizontal)
-        Button(action: {
-
-                   }) {
-                       Text("완료")
-                           .padding()
-                           .background(Color.blue)
-                           .foregroundColor(.white)
-                           .cornerRadius(8)
-                   }    }
+        Button("완료"){dismiss()}
+    }
 }
     
 #Preview {
