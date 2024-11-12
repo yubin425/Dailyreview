@@ -47,8 +47,13 @@ struct ReviewView: View {
     @State private var watchLocation = ""
     @State private var friends = ""
     
+    //커스텀 필드 관련
     @State private var customFields: [CustomField] = []
     @State private var newFieldName: String = ""
+    
+    @State private var isEditing = false // 편집 모드 활성화 여부
+    @State private var editingField: CustomField? = nil // 수정할 필드
+    
     private func addCustomField() {
         guard !newFieldName.isEmpty else { return }
         customFields.append(CustomField(name: newFieldName, value: ""))
@@ -58,6 +63,7 @@ struct ReviewView: View {
         customFields.removeAll()
     }
     
+    //리뷰 모달 관련
     @State private var showReviewField = false // 리뷰 입력창 표시 여부
     
     let movie: Movie  // DetailView에서 전달받은 영화 정보
@@ -69,7 +75,7 @@ struct ReviewView: View {
 
  
     var body: some View {
-       //ScrollView {
+       ScrollView {
             GeometryReader { geometry in
                 VStack {
                     Image("testImage")
@@ -136,45 +142,65 @@ struct ReviewView: View {
             .frame(height: 300)
             VStack {
                     // 기본 필드
-                List {
-                    Section(header: Text("기본 정보")) {
+                VStack {
+                    // 기본 정보
+                    VStack(alignment: .leading) {
+                        Text("기본 정보")
+                            .font(.headline)
+                            .padding(.top)
+                        
                         // 날짜 입력란
                         HStack {
                             Text("📅 날짜")
+                            Divider()
                             DatePicker("", selection: $watchDate, displayedComponents: .date)
                                 .labelsHidden()
                         }
-                            
+                        
                         // 위치 입력란
                         HStack {
                             Text("📍 위치")
+                            Divider()
                             TextField("영화를 본 위치", text: $watchLocation)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
-                            
+                        
                         // 친구 입력란
                         HStack {
-                            Text("👥 같이 본 사람")
+                            Text("👥 사람")
+                            Divider()
                             TextField("영화를 같이 본 친구", text: $friends)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
                     }
-                        
+
                     // 커스텀 필드
-                    Section(header: Text("커스텀 필드")) {
+                    VStack(alignment: .leading) {
                         ForEach($customFields) { $field in
                             HStack {
                                 TextField("필드 이름", text: $field.name)
                                 Divider()
                                 TextField("값을 입력하세요", text: $field.value)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                                
+                                // 삭제 버튼
+                                Button(action: {
+                                    // 해당 필드 삭제
+                                    if let index = customFields.firstIndex(where: { $0.id == field.id }) {
+                                        customFields.remove(at: index)
+                                    }
+                                }) {
+                                    Image(systemName: "trash.fill")
+                                        .foregroundColor(.red)
                                 }
+                                .padding(.leading, 8)
                             }
-                            .onDelete { indexSet in
+                        }
+                        .onDelete { indexSet in
                             customFields.remove(atOffsets: indexSet)
-                            }
-                            
-                            // 새로운 필드 추가
+                        }
+                        
+                        // 새로운 필드 추가
                         HStack {
                             TextField("새 필드 이름 입력", text: $newFieldName)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -182,15 +208,15 @@ struct ReviewView: View {
                                 addCustomField()
                             }
                         }
+
                         // 커스텀 필드 리셋 버튼
                         Button("모든 커스텀 필드 리셋") {
                             resetCustomFields()
                         }
                         .foregroundColor(.red)
                     }
+                
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
                 
             
                     // +상세 리뷰 추가 버튼
@@ -207,7 +233,7 @@ struct ReviewView: View {
                         ReviewTextEditorView(reviewText: $reviewText)// 모달로 표시될 뷰
                     }
             }
-            
+            .padding()
             
             Spacer()
             
@@ -215,7 +241,9 @@ struct ReviewView: View {
             HStack {
                 Button("등록") {
                     let newReview = Review(movieTitle: movieTitle, moviePoster: moviePoster, reviewText: reviewText, rating: rating, watchDate: watchDate, watchLocation: watchLocation, friends: friends, customFields: customFields)
+                    
                     modelContext.insert(newReview)
+                    
                     movieTitle = ""
                     moviePoster = ""
                     reviewText = ""
@@ -223,7 +251,7 @@ struct ReviewView: View {
                     watchDate = Date()
                     watchLocation = ""
                     friends = ""
-                    customFields = []
+                    customFields.removeAll()
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
@@ -248,7 +276,7 @@ struct ReviewView: View {
                 .cornerRadius(8)
             } //hstack 끝나는 곳
             .padding(.horizontal)
-       // }//scroll view
+       }//scroll view
     } //리뷰 바디 끝나는 곳
 }//리뷰 뷰 끝나는 곳
 

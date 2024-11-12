@@ -27,6 +27,7 @@
 		D05A3D932CCF94BC00BC6E9B /* DailyReview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DailyReview.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D05A3DA52CCF94BE00BC6E9B /* DailyReviewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailyReviewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D05A3DAF2CCF94BE00BC6E9B /* DailyReviewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DailyReviewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0D2573C2CE3B05F00E664CC /* DailyReview.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = DailyReview.xcodeproj; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,7 @@
 		D05A3D8A2CCF94BC00BC6E9B = {
 			isa = PBXGroup;
 			children = (
+				D0D2573C2CE3B05F00E664CC /* DailyReview.xcodeproj */,
 				D05A3D952CCF94BC00BC6E9B /* DailyReview */,
 				D05A3DA82CCF94BE00BC6E9B /* DailyReviewTests */,
 				D05A3DB22CCF94BE00BC6E9B /* DailyReviewUITests */,
