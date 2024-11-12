@@ -121,9 +121,9 @@ struct ReviewCalendarView: View {
 #Preview {
     // 임의의 리뷰 데이터로 프리뷰 생성
     let sampleReviews = [
-        Review(movieTitle: "Movie A", moviePoster: "film", reviewText: "Great movie!", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
-        Review(movieTitle: "Movie B", moviePoster: "star", reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie"),
-        Review(movieTitle: "Movie C", moviePoster: "star.fill", reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan")
+        Review(movieTitle: "Movie A", moviePoster: "film", reviewText: "Great movie!", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob",customFields: []),
+        Review(movieTitle: "Movie B", moviePoster: "star", reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie", customFields: []),
+        Review(movieTitle: "Movie C", moviePoster: "star.fill", reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan",customFields: [])
     ]
     
     ReviewCalendarView(reviews: sampleReviews)
