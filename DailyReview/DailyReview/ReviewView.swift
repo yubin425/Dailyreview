@@ -3,13 +3,14 @@ import SwiftData
 
 @Model
 class CustomField: ObservableObject, Identifiable {
-    var id: UUID = UUID()
+    var id: UUID
     var name: String
     var value: String
     
     init(name: String, value: String) {
         self.name = name
         self.value = value
+        self.id = UUID() // Ensure unique ID
     }
 }
 
@@ -23,9 +24,9 @@ class Review: ObservableObject {
     var watchDate: Date
     var watchLocation: String
     var friends: String
-    var customFields: [CustomField] = [] // 사용자 정의 필드들
+    @Relationship var customFields: [CustomField]?// 사용자 정의 필드들
     
-    init(movieTitle: String, moviePoster: String, reviewText: String, rating: Int, watchDate: Date, watchLocation: String, friends: String, customFields: [CustomField]) {
+    init(movieTitle: String, moviePoster: String, reviewText: String, rating: Int, watchDate: Date, watchLocation: String, friends: String) {
         self.movieTitle = movieTitle
         self.moviePoster = moviePoster
         self.reviewText = reviewText
@@ -33,7 +34,6 @@ class Review: ObservableObject {
         self.watchDate = watchDate
         self.watchLocation = watchLocation
         self.friends = friends
-        self.customFields = customFields
     }
 }
 
@@ -240,7 +240,12 @@ struct ReviewView: View {
             // Save and Cancel Buttons
             HStack {
                 Button("등록") {
-                    let newReview = Review(movieTitle: movieTitle, moviePoster: moviePoster, reviewText: reviewText, rating: rating, watchDate: watchDate, watchLocation: watchLocation, friends: friends, customFields: customFields)
+                    for field in customFields {
+                          modelContext.insert(field)
+                      }
+                    
+                    let newReview = Review(movieTitle: movieTitle, moviePoster: moviePoster, reviewText: reviewText, rating: rating, watchDate: watchDate, watchLocation: watchLocation, friends: friends)
+                    newReview.customFields = customFields
                     
                     modelContext.insert(newReview)
                     
@@ -292,5 +297,10 @@ struct ReviewView: View {
                keyword: ["Suspense", "Mystery"],
                plotText: "A thrilling tale of suspense and mystery."
            )
+    
+    // Create a model container with sample data for preview
+       let container = try! ModelContainer(for: Review.self, CustomField.self)
+
     ReviewView(movie: dummyMovie)
+        .modelContainer(container) 
 }
