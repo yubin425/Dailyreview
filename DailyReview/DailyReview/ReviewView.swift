@@ -286,6 +286,42 @@ struct ReviewView: View {
 }//리뷰 뷰 끝나는 곳
 
 
+struct FullReviewView: View {
+    let review: Review
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text(review.movieTitle)
+                    .font(.title)
+                    .bold()
+                
+                Text("Watched on: \(review.watchDate.formatted(date: .long, time: .omitted))")
+                    .font(.subheadline)
+                
+                Text("Rating: \(review.rating)/5")
+                    .font(.subheadline)
+                
+                Text("Location: \(review.watchLocation)")
+                    .font(.subheadline)
+                
+                Text("Friends: \(review.friends)")
+                    .font(.subheadline)
+                
+                Divider()
+                
+                Text("Review:")
+                    .font(.headline)
+                Text(review.reviewText)
+                    .font(.body)
+                
+                Spacer()
+            }
+            .padding()
+        }
+    }
+}
+
 #Preview {
     let dummyMovie = Movie(
                title: "Dummy Movie Title",
