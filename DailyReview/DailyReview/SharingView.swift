@@ -12,38 +12,52 @@ struct SharingView: View {
 
     var body: some View {
         VStack {
-            
             if let screenshotImage = screenshotImage {
                 Image(uiImage: screenshotImage)
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: 300)
                     .padding()
-            }
-            
-            else {
+            } else {
                 Image("poster1")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: 300)
                     .padding()
             }
-            
-            
-            
-            Button(action: {
-                takeScreenshot()
-            }) {
-                Text("Capture Screenshot")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
 
-            
-            
-            
+            HStack {
+                Button(action: {
+                    takeScreenshot()
+                }) {
+                    Text("Capture Screenshot")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+
+                Button(action: {
+                    saveScreenshot()
+                }) {
+                    Text("Save Screenshot")
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+
+                Button(action: {
+                    shareScreenshot()
+                }) {
+                    Text("Share Screenshot")
+                        .padding()
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            }
+            .padding()
         }
     }
 
@@ -67,8 +81,29 @@ struct SharingView: View {
             }
         }
     }
-}
 
+    func saveScreenshot() {
+        guard let screenshot = screenshotImage else {
+            return
+        }
+
+        UIImageWriteToSavedPhotosAlbum(screenshot, nil, nil, nil)
+    }
+
+    func shareScreenshot() {
+        guard let screenshot = screenshotImage else {
+            return
+        }
+
+        let activityViewController = UIActivityViewController(activityItems: [screenshot], applicationActivities: nil)
+
+        // Present the activity view controller
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
+            rootViewController.present(activityViewController, animated: true, completion: nil)
+        }
+    }
+}
 
 #Preview {
     SharingView()
