@@ -8,18 +8,24 @@ struct ReviewListView: View {
     @Binding var sortOption: SortOption // sortOption을 Binding으로 받기
     
     enum SortOption: String, CaseIterable, Identifiable {
-        case date = "Date"
-        case title = "Title"
+        case dateAs = "Date↑"
+        case dateDs = "Date↓"
+        case titleAs = "Title↑"
+        case titleDs = "Title↓"
         
         var id: String { self.rawValue }
     }
     
     var sortedReviews: [Review] {
         switch sortOption {
-        case .date:
+        case .dateAs:
             return reviews.sorted { $0.watchDate > $1.watchDate }
-        case .title:
+        case .dateDs:
+            return reviews.sorted { $0.watchDate < $1.watchDate }
+        case .titleAs:
             return reviews.sorted { $0.movieTitle < $1.movieTitle }
+        case .titleDs:
+            return reviews.sorted { $0.movieTitle > $1.movieTitle }
         }
     }
     
@@ -58,7 +64,7 @@ struct ReviewSummaryView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: review.moviePoster)
+            Image(systemName: review.moviePoster ?? "film")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 60, height: 90)
@@ -88,9 +94,9 @@ struct ReviewSummaryView: View {
 }
 
 
-struct ContentView: View {
+struct ReviewQueryView: View {
     @State private var selectedView: ViewOption = .list // 기본은 리스트 뷰
-    @State private var sortOption: ReviewListView.SortOption = .date // 초기 정렬 옵션
+    @State private var sortOption: ReviewListView.SortOption = .dateAs // 초기 정렬 옵션
     let reviews: [Review]
     
     enum ViewOption {
@@ -114,10 +120,14 @@ struct ContentView: View {
                         Button(action: {
                             // 정렬 옵션 변경
                             switch sortOption {
-                            case .date:
-                                sortOption = .title
-                            case .title:
-                                sortOption = .date
+                            case .dateAs:
+                                sortOption = .dateDs
+                            case .dateDs:
+                                sortOption = .titleAs
+                            case .titleAs:
+                                sortOption = .titleDs
+                            case .titleDs:
+                                sortOption = .dateAs
                             }
                         }) {
                             Text("\(sortOption.rawValue)")
@@ -125,7 +135,7 @@ struct ContentView: View {
                                 .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
-                                .frame(width: 50) // 버튼 크기 문제 해결 필요
+                                .frame(width: 70) // 버튼 크기 문제 해결 필요
                         }
                     }
                 }
@@ -152,8 +162,8 @@ struct ContentView: View {
     let sampleReviews = [
         Review(movieTitle: "La La Land", moviePoster: "film", reviewText: "A romantic musical journey.", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
         Review(movieTitle: "Demian", moviePoster: "book", reviewText: "A philosophical story of self-discovery.", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: -10, to: Date())!, watchLocation: "Library", friends: "Charlie"),
-        Review(movieTitle: "Chicago", moviePoster: "music.mic", reviewText: "A dazzling Broadway show adaptation.", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Theater", friends: "Diana, Evan")
+        Review(movieTitle: "Chicago", moviePoster: "music.mic", reviewText: "A dazzling Broadway show adaptation. ", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Theater", friends: "Diana, Evan")
     ]
     
-    ContentView(reviews: sampleReviews)
+    ReviewQueryView(reviews: sampleReviews)
 }
