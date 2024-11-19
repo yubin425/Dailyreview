@@ -6,8 +6,7 @@ class CustomField: ObservableObject, Identifiable {
     var id: UUID
     var name: String
     var value: String
-    @Relationship(inverse: \Review.customFields) var review: Review? // 반대 방향 관계 설정
-    
+    @Relationship(inverse: \Review.customFields) var review: Review?
     init(name: String, value: String) {
         self.name = name
         self.value = value
@@ -266,6 +265,7 @@ struct ReviewView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
                 }
+                .padding()
             }
             .navigationDestination(isPresented: $navigateToFullReview) {
                 if let review = selectedReview {
@@ -274,7 +274,7 @@ struct ReviewView: View {
                     Text("No Review Found")
                 }
             }
-            .padding(.horizontal)
+            
         }
     }
 }
@@ -284,57 +284,115 @@ struct FullReviewView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // 기본 정보 출력
-                Text(review.movieTitle)
-                    .font(.title)
-                    .bold()
-                
-                Text("Watched on: \(review.watchDate.formatted(date: .long, time: .omitted))")
-                    .font(.subheadline)
-                
-                Text("Rating: \(review.rating)/5")
-                    .font(.subheadline)
-                
-                Text("Location: \(review.watchLocation)")
-                    .font(.subheadline)
-                
-                Text("Friends: \(review.friends)")
-                    .font(.subheadline)
-                
-                Divider()
-                
-                // 리뷰 텍스트 출력
-                Text("Review:")
-                    .font(.headline)
-                Text(review.reviewText)
-                    .font(.body)
-                
-                Divider()
-                
-                // 커스텀 필드 출력
-                if let customFields = review.customFields, !customFields.isEmpty {
-                    Text("Custom Fields:")
-                        .font(.headline)
-                    
-                    ForEach(customFields) { field in
-                        HStack {
-                            Text("\(field.name):")
-                                .bold()
-                            Text(field.value)
-                        }
-                        .padding(.vertical, 2)
+            VStack {
+                GeometryReader { geometry in
+                    VStack {
+                        Image("testImage")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width, height: 300)
+                            .clipped()
+                            .overlay(Color.white.opacity(0.7))
+                            .overlay(
+                                VStack(alignment: .center) {
+                                    HStack {
+                                        Image("testImage")
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 150)
+                                            .padding(.horizontal)
+                                        Spacer()
+                                        
+                                        VStack {
+                                            Text("\(review.movieTitle)")
+                                                .font(.title)
+                                                .foregroundColor(.black)
+                                                .multilineTextAlignment(.center)
+                                                .padding(.bottom, 5)
+                                            //Text("\(String(movie.director.first ?? "null")),\(String(movie.releaseYear ?? "null"))")
+                                            //Text("\(String(movie.plotText ?? "null"))")
+                                                .multilineTextAlignment(.center)
+                                            
+                                            HStack {
+                                                ForEach(1...5, id: \.self) { index in
+                                                    Image(systemName: index <= review.rating ? "star.fill" : "star")
+                                                        .resizable()
+                                                        .frame(width: 30, height: 30)
+                                                        .foregroundColor(index <= review.rating ? .orange : .black)
+                                                }
+                                            }
+                                        }
+                                        .padding(.horizontal)
+                                    }
+                                    
+                                    HStack {
+                                        //Text("출연자:\(String(movie.director.first ?? "null"))")
+                                            //.lineLimit(1)
+                                            //.truncationMode(.tail)
+                                        
+                                        Spacer()
+                                        
+                                        //Text(Tags)
+                                            //.lineLimit(1)
+                                            //.truncationMode(.tail)
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.top, 5)
+                                }
+                            )
                     }
-                } else {
-                    Text("No custom fields added.")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
                 }
+                .background(Color.white.opacity(0.3))
+                .frame(height: 300)
+                
+                VStack(alignment: .leading, spacing: 20){
+                    Text("Watched on: \(review.watchDate.formatted(date: .long, time: .omitted))")
+                        .font(.subheadline)
+                    
+                    Text("Rating: \(review.rating)/5")
+                        .font(.subheadline)
+                    
+                    Text("Location: \(review.watchLocation)")
+                        .font(.subheadline)
+                    
+                    Text("Friends: \(review.friends)")
+                        .font(.subheadline)
+                    
+                    Divider()
+                    // 커스텀 필드 출력
+                    if let customFields = review.customFields, !customFields.isEmpty {
+                        Text("Custom Fields:")
+                            .font(.headline)
+                        
+                        ForEach(customFields) { field in
+                            HStack {
+                                Text("\(field.name):")
+                                    .bold()
+                                Text(field.value)
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    } else {
+                        Text("No custom fields added.")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    Divider()
+                    
+                    // 리뷰 텍스트 출력
+                    Text("Review:")
+                        .font(.headline)
+                    Text(review.reviewText)
+                        .font(.body)
+                    
+                    
+
+                }
+                .padding()
                 
                 Spacer()
-            }
-            .padding()
-        }
+            } // 가장 상위 vstack
+        } //scrollview
         .navigationTitle("Review Details")
     }
 }
