@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SharingView: View {
     @State private var screenshotImage: UIImage?
+    @State private var isEditing = false
 
     var body: some View {
         VStack {
@@ -38,11 +39,11 @@ struct SharingView: View {
                 }
 
                 Button(action: {
-                    saveScreenshot()
+                    isEditing.toggle()
                 }) {
-                    Text("Save Screenshot")
+                    Text("Edit Screenshot")
                         .padding()
-                        .background(Color.green)
+                        .background(Color.purple)
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
@@ -58,6 +59,9 @@ struct SharingView: View {
                 }
             }
             .padding()
+            .sheet(isPresented: $isEditing) {
+                EditScreenshotView(screenshotImage: $screenshotImage)
+            }
         }
     }
 
@@ -82,14 +86,6 @@ struct SharingView: View {
         }
     }
 
-    func saveScreenshot() {
-        guard let screenshot = screenshotImage else {
-            return
-        }
-
-        UIImageWriteToSavedPhotosAlbum(screenshot, nil, nil, nil)
-    }
-
     func shareScreenshot() {
         guard let screenshot = screenshotImage else {
             return
@@ -102,6 +98,78 @@ struct SharingView: View {
            let rootViewController = windowScene.windows.first?.rootViewController {
             rootViewController.present(activityViewController, animated: true, completion: nil)
         }
+    }
+}
+
+struct EditScreenshotView: View {
+    @Binding var screenshotImage: UIImage?
+    
+    var body: some View {
+        VStack {
+            if let screenshotImage = screenshotImage {
+                Image(uiImage: screenshotImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: 300)
+                    .padding()
+            }
+
+            HStack {
+                Button(action: {
+                    applyEdgeDesign1()
+                }) {
+                    Text("Edge Design 1")
+                        .padding()
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+
+                Button(action: {
+                    applyEdgeDesign2()
+                }) {
+                    Text("Edge Design 2")
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            }
+            .padding()
+        }
+    }
+
+    func applyEdgeDesign1() {
+        guard let screenshot = screenshotImage else { return }
+
+        let renderer = UIGraphicsImageRenderer(size: screenshot.size)
+        let image = renderer.image { context in
+            let rect = CGRect(origin: .zero, size: screenshot.size)
+            context.cgContext.setFillColor(UIColor.red.cgColor)
+            context.cgContext.fill(rect)
+            context.cgContext.addPath(UIBezierPath(roundedRect: rect.insetBy(dx: 10, dy: 10), cornerRadius: 20).cgPath)
+            context.cgContext.clip()
+            screenshot.draw(in: rect)
+        }
+        
+        screenshotImage = image
+    }
+
+
+    func applyEdgeDesign2() {
+        guard let screenshot = screenshotImage else { return }
+
+        let renderer = UIGraphicsImageRenderer(size: screenshot.size)
+        let image = renderer.image { context in
+            let rect = CGRect(origin: .zero, size: screenshot.size)
+            context.cgContext.setFillColor(UIColor.green.cgColor)
+            context.cgContext.fill(rect)
+            context.cgContext.addPath(UIBezierPath(roundedRect: rect.insetBy(dx: 10, dy: 10), cornerRadius: 20).cgPath)
+            context.cgContext.clip()
+            screenshot.draw(in: rect)
+        }
+        
+        screenshotImage = image
     }
 }
 

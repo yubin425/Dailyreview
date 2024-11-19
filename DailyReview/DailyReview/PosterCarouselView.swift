@@ -66,6 +66,7 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
             self.collectionView.scrollToItem(at: initialIndexPath, at: .centeredHorizontally, animated: false)
             self.updateVisibleCells()
         }
+        
     }
     
     private func updateVisibleCells() {

@@ -8,15 +8,12 @@
 import SwiftUI
 import UIKit
 
-
 struct MainView_Previews: PreviewProvider {
     static var previews: some View {
         MainView()
             .edgesIgnoringSafeArea(.all)
     }
 }
-
-
 
 struct SearchResultsView: View {
     var body: some View {
@@ -32,9 +29,16 @@ struct SearchResultsView: View {
 struct MainView: View {
     @State private var selectedTab = 0
 
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
-            FakeMainView() // Show FakeMainView in the search tab
+            FakeMainView()
                 .tabItem {
                     VStack {
                         Image(systemName: "magnifyingglass")
@@ -70,11 +74,10 @@ struct MainView: View {
                 }
                 .tag(3)
         }
-        .accentColor(.black)
+        .accentColor(.red)  // Highlight selected tab with red color
         .edgesIgnoringSafeArea(.all)
     }
 }
-
 
 struct NotificationBlock: View {
     let message: String
@@ -90,4 +93,3 @@ struct NotificationBlock: View {
         .padding(.vertical, 5)
     }
 }
-
