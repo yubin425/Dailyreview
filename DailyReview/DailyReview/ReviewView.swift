@@ -18,11 +18,9 @@ class Review{
 }
 
 struct ReviewView: View {
+    var movie: Movie?
+    var review: Review?
     var body: some View {
         Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
     }
-}
-
-#Preview {
-    ReviewView()
 }

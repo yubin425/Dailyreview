@@ -1,34 +1,64 @@
-//
-//  WishlistView.swift
-//  DailyReview
-//
-//  Created by Lee Hyun on 11/6/24.
-//
 import SwiftUI
 
-struct WishlistView: View {
-    let movie: Movie  // DetailView에서 전달받은 영화 정보
-
+struct WishListView: View {
+    @EnvironmentObject var wishListFolder: WishListFolder  // 환경 객체로 WishListFolder를 받음
+    var name:String
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("위시리스트 추가 - \(movie.title)")
-                .font(.title)
-                .padding(.bottom, 5)
-
-            Button(action: {
-                // 위시리스트에 영화 추가 로직 추가
-                print("위시리스트에 \(movie.title) 추가")
-            }) {
-                Text("위시리스트에 추가")
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.green)
-                    .cornerRadius(10)
+        var wishList = wishListFolder.wishLists[name]!
+        NavigationView {
+            VStack {
+                if wishList.isEmpty {
+                    Text("위시리스트가 비어 있습니다.")
+                        .foregroundColor(.gray)
+                        .padding()
+                } else {
+                    List {
+                        ForEach(wishList) { movie in
+                            HStack {
+                                if let posterUrl = movie.poster, let url = URL(string: posterUrl) {
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            ProgressView()
+                                        case .success(let image):
+                                            image.resizable().scaledToFit().frame(width: 60, height: 90)
+                                        case .failure:
+                                            Image(systemName: "film").resizable().scaledToFit().frame(width: 60, height: 90)
+                                        @unknown default:
+                                            EmptyView()
+                                        }
+                                    }
+                                }
+                                VStack(alignment: .leading) {
+                                    Text(movie.title)
+                                        .font(.headline)
+                                    Text(movie.director.joined(separator: ", "))
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                Spacer()
+                                Button(action: {
+                                    wishListFolder.removeMovieToWishList(name: name, movie: movie)
+                                }) {
+                                    Image(systemName: "trash").foregroundColor(.red)
+                                }
+                            }
+                        }
+                    }
+                }
             }
-
-            Spacer()
+            .navigationTitle("위시리스트") // 네비게이션 타이틀 설정
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: SearchView(Flag: "wishlist", wishlistName:name)) {
+                        // "+" 버튼
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
         }
-        .padding()
-        .navigationTitle("위시리스트 추가")
     }
 }

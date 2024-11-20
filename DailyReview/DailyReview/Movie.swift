@@ -2,7 +2,7 @@
 import Foundation
 
 // 영화의 핵심 정보를 담은 구조체
-struct Movie: Decodable, Identifiable {
+struct Movie: Decodable, Identifiable, Equatable {
     let id: UUID
     let title: String
     let director: [String]
@@ -23,6 +23,10 @@ struct Movie: Decodable, Identifiable {
         self.genre = genre
         self.keyword = keyword
         self.plotText = plotText
+    }
+    
+    static func == (lhs: Movie, rhs: Movie) -> Bool {
+        return lhs.id == rhs.id
     }
     
     static func cleanStr(from str: String) -> String {

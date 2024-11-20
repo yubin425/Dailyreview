@@ -13,7 +13,7 @@ import SwiftData
 struct swiftUIPracticeApp: App {
     var body: some Scene {
         WindowGroup {
-            SearchView()
+            SearchView(Flag: "main")
         }
     }
 }
