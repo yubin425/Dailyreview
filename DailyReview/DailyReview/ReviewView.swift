@@ -6,13 +6,21 @@
 //
 
 import SwiftUI
+import SwiftData
 
-struct ReviewView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+@Model
+class Review{
+    var type: String
+    
+    init(type: String) {
+        self.type = type
     }
 }
 
-#Preview {
-    ReviewView()
+struct ReviewView: View {
+    var movie: Movie?
+    var review: Review?
+    var body: some View {
+        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+    }
 }

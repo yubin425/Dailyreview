@@ -36,6 +36,7 @@ struct MainView: View {
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 
+
     var body: some View {
         TabView(selection: $selectedTab) {
             FakeMainView()
