@@ -39,6 +39,7 @@ struct DailyReviewApp: App {
             
             let sampleReviews = [
                 Review(movieStorage:dummyMovie, reviewText: "Great movie!", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
+                Review(movieStorage:dummyMovie, reviewText: "wowow", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "my house", friends: "my friends"),
                 Review(movieStorage:dummyMovie, reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie"),
                 Review(movieStorage:dummyMovie, reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan")
             ]

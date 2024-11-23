@@ -3,7 +3,8 @@ import SwiftUI
 struct ReviewCalendarView: View {
     @State private var navigateToEditView = false
     @State private var displayedMonth: Date = Date() // 현재 표시되는 달
-    @State private var selectedReview: Review? = nil // 선택된 리뷰
+    @State private var selectedReviews: [Review] = [] // 선택된 날짜의 모든 리뷰
+    @State private var currentReviewIndex: Int = 0 // 현재 표시 중인 리뷰의 인덱스
     @State private var showFullReview: Bool = false // 전체 리뷰 보기 여부
     
     let reviews: [Review]
@@ -71,12 +72,15 @@ struct ReviewCalendarView: View {
                                 Text("\(calendar.component(.day, from: day))")
                                     .font(.caption)
                                 
-                                if let review = reviews.first(where: { calendar.isDate($0.watchDate, inSameDayAs: day) }) {
-                                    // 리뷰가 있는 날짜에 포스터 표시
+                                let dayReviews = reviews.filter { calendar.isDate($0.watchDate, inSameDayAs: day) }
+                                
+                                if let firstReview = dayReviews.first {
+                                    // 날짜에 리뷰가 있으면 첫 번째 리뷰의 포스터 표시
                                     Button(action: {
-                                        selectedReview = review // 요약 정보만 설정
+                                        selectedReviews = dayReviews
+                                        currentReviewIndex = 0
                                     }) {
-                                        Image(review.movieStorage.poster ?? "testImage")
+                                        Image(firstReview.movieStorage.poster ?? "testImage")
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 40.5, height: 60)
@@ -99,11 +103,23 @@ struct ReviewCalendarView: View {
                 .padding(.horizontal)
                 
                 // 리뷰 요약 정보 표시
-                if let review = selectedReview {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Button(action: {
-                            showFullReview = true // 전체 리뷰 보기 화면으로 전환
-                        }) {
+                if !selectedReviews.isEmpty {
+                    let review = selectedReviews[currentReviewIndex]
+                    Button(action: {
+                        showFullReview = true // 전체 리뷰 보기 화면으로 전환
+                    }) {
+                        HStack {
+                            // 이전 리뷰 버튼
+                            Button(action: {
+                                currentReviewIndex = max(0, currentReviewIndex - 1) // 이전 리뷰로 이동
+                            }) {
+                                Image(systemName: "chevron.left")
+                            }
+                            .disabled(currentReviewIndex == 0) // 첫 리뷰인 경우 비활성화
+                            
+                            Spacer()
+                            
+                            // 리뷰 요약 내용
                             VStack(alignment: .leading, spacing: 5) {
                                 Text("\(review.movieStorage.title)")
                                     .font(.headline)
@@ -113,43 +129,30 @@ struct ReviewCalendarView: View {
                                     .font(.body)
                                     .foregroundColor(.gray)
                             }
-                            .padding()
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
+                            .padding(.horizontal)
+                            
+                            Spacer()
+                            
+                            // 다음 리뷰 버튼
+                            Button(action: {
+                                currentReviewIndex = min(selectedReviews.count - 1, currentReviewIndex + 1) // 다음 리뷰로 이동
+                            }) {
+                                Image(systemName: "chevron.right")
+                            }
+                            .disabled(currentReviewIndex == selectedReviews.count - 1) // 마지막 리뷰인 경우 비활성화
                         }
+                        .padding()
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
                     }
                     .padding(.horizontal)
                 }
             }
         }
         .sheet(isPresented: $showFullReview) {
-            if let review = selectedReview {
-                FullReviewView(review: review)
+            if !selectedReviews.isEmpty {
+                FullReviewView(review: selectedReviews[currentReviewIndex])
             }
         }
     }
 }
-
-
-
-//#Preview {
-//    let dummyMovie = MovieStorage(
-//            id:     UUID(),
-//            title: "Dummy Movie Title",
-//            director: ["John Doe"],
-//            releaseYear: "2023",
-//            poster: nil,
-//            still: nil,
-//            genre: ["Drama", "Thriller"],
-//            keyword: ["Suspense", "Mystery"],
-//            plotText: "A thrilling tale of suspense and mystery."
-//           )
-//    
-//    let sampleReviews = [
-//        Review(movieStorage:dummyMovie, reviewText: "Great movie!", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
-//        Review(movieStorage:dummyMovie, reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie"),
-//        Review(movieStorage:dummyMovie, reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan")
-//    ]
-//    
-//    ReviewQueryView(reviews: sampleReviews)
-//}

@@ -185,7 +185,6 @@ struct EditReviewView: View {
                     // 저장 및 취소 버튼
                     actionButtons()
                 }
-                .padding()
             }
             .onAppear {
                 initializeLocalState()
@@ -288,6 +287,7 @@ struct EditReviewView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
             }
         }
+        .padding()
     }
 
     @ViewBuilder
@@ -325,6 +325,7 @@ struct EditReviewView: View {
             }
             .foregroundColor(.red)
         }
+        .padding()
     }
 
     @ViewBuilder
