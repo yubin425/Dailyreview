@@ -28,6 +28,7 @@ struct SearchResultsView: View {
 
 struct MainView: View {
     @State private var selectedTab = 0
+    @State private var wishListFolder = WishListFolder()
 
     init() {
         let appearance = UITabBarAppearance()
@@ -47,6 +48,8 @@ struct MainView: View {
                     }
                 }
                 .tag(0)
+                .environmentObject(wishListFolder)
+
 
             ReviewView()
                 .tabItem {
@@ -57,7 +60,7 @@ struct MainView: View {
                 }
                 .tag(1)
 
-            WishListView()
+            WishListFolderView()
                 .tabItem {
                     VStack {
                         Image(systemName: "bookmark")
@@ -65,6 +68,7 @@ struct MainView: View {
                     }
                 }
                 .tag(2)
+                .environmentObject(wishListFolder)
 
             MyPageView()
                 .tabItem {

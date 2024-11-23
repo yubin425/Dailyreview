@@ -15,6 +15,10 @@ class WishListFolder: ObservableObject {
         wishLists[name] = []
     }
     
+    func deleteWishList(name: String) {
+        wishLists.removeValue(forKey: name)
+    }
+
     func addMovieToWishList(name: String, movie: Movie) {
         guard let wishList = wishLists[name] else { return }
         
@@ -27,5 +31,14 @@ class WishListFolder: ObservableObject {
         if let index = wishLists[name]?.firstIndex(where: { $0.id == movie.id }) {
             wishLists[name]?.remove(at: index)
         }
+    }
+    
+    func getPoster(name: String) -> String? {
+        if let wishList = wishLists[name] {
+            if let movie = wishList.first {
+                return movie.poster
+            }
+        }
+        return nil
     }
 }

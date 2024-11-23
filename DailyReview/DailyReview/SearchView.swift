@@ -40,9 +40,12 @@ struct SearchView: View {
                     }) {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.blue)
-                            .padding()
+                            .padding(.trailing, 20)
                     }
                 }
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(40)
+                .padding(.horizontal)
                 
                 // 검색 결과
                 List(viewModel.movies) { theMovie in
@@ -59,8 +62,9 @@ struct SearchView: View {
                         }
                     }
                 }
+                
             }
-            .navigationTitle("영화 검색")
+            Spacer()
         }
     }
 }

@@ -10,14 +10,16 @@ import SwiftUI
 struct FakeMainView: View {
     @State private var searchText = ""
     @State private var showSearchView = false
-    
+    @EnvironmentObject var wishListFolder: WishListFolder
     let posters = ["poster1", "poster2", "poster3", "poster4", "poster5"]
     
     var body: some View {
         VStack {
             if showSearchView {
                 NavigationStack {
-                    SearchView(showSearchView: $showSearchView)
+                    SearchView(Flag: "main")
+                        .environmentObject(wishListFolder)
+
                 }
             } else {
                 ZStack {
@@ -64,5 +66,6 @@ struct FakeMainView_Previews: PreviewProvider {
     static var previews: some View {
         FakeMainView()
             .edgesIgnoringSafeArea(.all)
+            .environmentObject(WishListFolder())
     }
 }
