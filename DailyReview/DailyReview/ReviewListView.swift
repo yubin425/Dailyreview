@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ReviewListView: View {
+    @State private var navigateToEditView = false
     @State private var selectedReview: Review? = nil // 선택된 리뷰
     @State private var showFullReview: Bool = false // 전체 리뷰 보기 여부
     
@@ -23,9 +24,9 @@ struct ReviewListView: View {
         case .dateDs:
             return reviews.sorted { $0.watchDate < $1.watchDate }
         case .titleAs:
-            return reviews.sorted { $0.movieTitle < $1.movieTitle }
+            return reviews.sorted { $0.movieStorage.title < $1.movieStorage.title }
         case .titleDs:
-            return reviews.sorted { $0.movieTitle > $1.movieTitle }
+            return reviews.sorted { $0.movieStorage.title > $1.movieStorage.title }
         }
     }
     
@@ -53,6 +54,7 @@ struct ReviewListView: View {
         .sheet(isPresented: $showFullReview) {
             if let review = selectedReview {
                 FullReviewView(review: review)
+
             }
         }
     }
@@ -64,7 +66,7 @@ struct ReviewSummaryView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: review.moviePoster ?? "film")
+            Image(review.movieStorage.poster ?? "testImage")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 60, height: 90)
@@ -76,7 +78,7 @@ struct ReviewSummaryView: View {
                     .font(.caption)
                     .foregroundColor(.gray)
                 
-                Text(review.movieTitle)
+                Text(review.movieStorage.title)
                     .font(.headline)
                     .bold()
                 
@@ -158,12 +160,3 @@ struct ReviewQueryView: View {
     }
 }
 
-#Preview {
-    let sampleReviews = [
-        Review(movieTitle: "La La Land", moviePoster: "film", reviewText: "A romantic musical journey.", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
-        Review(movieTitle: "Demian", moviePoster: "book", reviewText: "A philosophical story of self-discovery.", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: -10, to: Date())!, watchLocation: "Library", friends: "Charlie"),
-        Review(movieTitle: "Chicago", moviePoster: "music.mic", reviewText: "A dazzling Broadway show adaptation. ", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Theater", friends: "Diana, Evan")
-    ]
-    
-    ReviewQueryView(reviews: sampleReviews)
-}

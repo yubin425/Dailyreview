@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ReviewCalendarView: View {
+    @State private var navigateToEditView = false
     @State private var displayedMonth: Date = Date() // 현재 표시되는 달
     @State private var selectedReview: Review? = nil // 선택된 리뷰
     @State private var showFullReview: Bool = false // 전체 리뷰 보기 여부
@@ -75,7 +76,7 @@ struct ReviewCalendarView: View {
                                     Button(action: {
                                         selectedReview = review // 요약 정보만 설정
                                     }) {
-                                        Image(systemName: "film")
+                                        Image(review.movieStorage.poster ?? "testImage")
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 40.5, height: 60)
@@ -104,7 +105,7 @@ struct ReviewCalendarView: View {
                             showFullReview = true // 전체 리뷰 보기 화면으로 전환
                         }) {
                             VStack(alignment: .leading, spacing: 5) {
-                                Text("\(review.movieTitle)")
+                                Text("\(review.movieStorage.title)")
                                     .font(.headline)
                                 
                                 Text(review.reviewText)
@@ -131,12 +132,24 @@ struct ReviewCalendarView: View {
 
 
 
-#Preview {
-    let sampleReviews = [
-        Review(movieTitle: "Movie A", moviePoster: "film", reviewText: "Great movie!", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
-        Review(movieTitle: "Movie B", moviePoster: "star", reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie"),
-        Review(movieTitle: "Movie C", moviePoster: "star.fill", reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan")
-    ]
-    
-    ReviewCalendarView(reviews: sampleReviews)
-}
+//#Preview {
+//    let dummyMovie = MovieStorage(
+//            id:     UUID(),
+//            title: "Dummy Movie Title",
+//            director: ["John Doe"],
+//            releaseYear: "2023",
+//            poster: nil,
+//            still: nil,
+//            genre: ["Drama", "Thriller"],
+//            keyword: ["Suspense", "Mystery"],
+//            plotText: "A thrilling tale of suspense and mystery."
+//           )
+//    
+//    let sampleReviews = [
+//        Review(movieStorage:dummyMovie, reviewText: "Great movie!", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
+//        Review(movieStorage:dummyMovie, reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie"),
+//        Review(movieStorage:dummyMovie, reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan")
+//    ]
+//    
+//    ReviewQueryView(reviews: sampleReviews)
+//}

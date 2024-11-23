@@ -2,6 +2,33 @@ import SwiftUI
 import SwiftData
 
 @Model
+class MovieStorage: ObservableObject, Identifiable {
+    var id: UUID
+    var title: String
+    var director: [String]
+    var releaseYear: String?
+    var poster: String?
+    var still: String?
+    var genre: [String]
+    var keyword: [String]
+    var plotText: String?
+    
+    
+    init(id: UUID, title: String, director: [String], releaseYear: String? = nil, poster: String? = nil, still: String? = nil, genre: [String], keyword: [String], plotText: String? = nil) {
+        self.id = id
+        self.title = Movie.cleanStr(from: title)
+        self.director = director.map { Movie.cleanStr(from: $0) }
+        self.releaseYear = releaseYear
+        self.poster = Movie.extractFirst(from: poster)?.replacingOccurrences(of: "http://", with: "https://")
+        self.still = Movie.extractFirst(from: still)?.replacingOccurrences(of: "http://", with: "https://")
+        self.genre = genre
+        self.keyword = keyword
+        self.plotText = plotText
+    }
+}
+
+
+@Model
 class CustomField: ObservableObject, Identifiable {
     var id: UUID
     var name: String
@@ -17,18 +44,16 @@ class CustomField: ObservableObject, Identifiable {
 @Model
 class Review: ObservableObject {
     var id: UUID = UUID()
-    var movieTitle: String
-    var moviePoster: String?  // 영화 포스터 이미지 이름
+    @Relationship var movieStorage: MovieStorage //movie 대신 storage로 새로 저장하기
     var reviewText: String
     var rating: Int
     var watchDate: Date
     var watchLocation: String
     var friends: String
-    @Relationship var customFields: [CustomField]?// 사용자 정의 필드들
+    @Relationship var customFields: [CustomField]? // 사용자 정의 필드들
     
-    init(movieTitle: String, moviePoster: String?, reviewText: String, rating: Int, watchDate: Date, watchLocation: String, friends: String) {
-        self.movieTitle = movieTitle
-        self.moviePoster = moviePoster
+    init(movieStorage: MovieStorage, reviewText: String, rating: Int, watchDate: Date, watchLocation: String, friends: String) {
+        self.movieStorage = movieStorage
         self.reviewText = reviewText
         self.rating = rating
         self.watchDate = watchDate
@@ -222,27 +247,43 @@ struct ReviewView: View {
                 Spacer()
                 
                 HStack {
-                    
                     Button("등록") {
+                        // 영화 정보 저장
+                        let movieStorage = MovieStorage(
+                            id: movie.id,
+                            title: movie.title,
+                            director: movie.director,
+                            releaseYear: movie.releaseYear,
+                            poster: movie.poster,
+                            still: movie.still,
+                            genre: movie.genre,
+                            keyword: movie.keyword,
+                            plotText: movie.plotText
+                        )
+                        modelContext.insert(movieStorage) // SwiftData 컨텍스트에 삽입
+
+                        // 리뷰 생성
                         let newReview = Review(
-                            movieTitle: movie.title,
-                            moviePoster: movie.poster,
+                            movieStorage: movieStorage,
                             reviewText: reviewText,
                             rating: rating,
                             watchDate: watchDate,
                             watchLocation: watchLocation,
                             friends: friends
                         )
-                        
-                        // CustomField 추가
-                        if !customFields.isEmpty {
-                            newReview.customFields = customFields
+                        modelContext.insert(newReview) // SwiftData 컨텍스트에 삽입
+
+                        // 커스텀 필드 추가 및 관계 설정
+                        for field in customFields {
+                            field.review = newReview
+                            modelContext.insert(field) // SwiftData 컨텍스트에 삽입
                         }
-                        
+
                         // 상태 업데이트 및 이동
                         selectedReview = newReview
                         navigateToFullReview = true // Navigation trigger
                     }
+
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.red.opacity(0.7))
@@ -279,73 +320,79 @@ struct ReviewView: View {
     }
 }
 
+
+
 struct FullReviewView: View {
-    let review: Review
+    @State var review: Review
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(alignment: .leading) {
+                // 포스터 표시
                 GeometryReader { geometry in
-                    VStack {
-                        Image("testImage")
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: geometry.size.width, height: 300)
-                            .clipped()
-                            .overlay(Color.white.opacity(0.7))
-                            .overlay(
-                                VStack(alignment: .center) {
-                                    HStack {
-                                        Image("testImage")
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(width: 150)
-                                            .padding(.horizontal)
-                                        Spacer()
-                                        
-                                        VStack {
-                                            Text("\(review.movieTitle)")
-                                                .font(.title)
-                                                .foregroundColor(.black)
-                                                .multilineTextAlignment(.center)
-                                                .padding(.bottom, 5)
-                                            //Text("\(String(movie.director.first ?? "null")),\(String(movie.releaseYear ?? "null"))")
-                                            //Text("\(String(movie.plotText ?? "null"))")
-                                                .multilineTextAlignment(.center)
-                                            
-                                            HStack {
-                                                ForEach(1...5, id: \.self) { index in
-                                                    Image(systemName: index <= review.rating ? "star.fill" : "star")
+                                VStack {
+                                    Image("testImage")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: geometry.size.width, height: 300)
+                                        .clipped()
+                                        .overlay(Color.white.opacity(0.7))
+                                        .overlay(
+                                            VStack(alignment: .center) {
+                                                HStack {
+                                                    Image("testImage")
                                                         .resizable()
-                                                        .frame(width: 30, height: 30)
-                                                        .foregroundColor(index <= review.rating ? .orange : .black)
+                                                        .aspectRatio(contentMode: .fit)
+                                                        .frame(width: 150)
+                                                        .padding(.horizontal)
+                                                    Spacer()
+                                                    
+                                                    VStack {
+                                                        Text("\(review.movieStorage.title)")
+                                                            .font(.title)
+                                                            .foregroundColor(.black)
+                                                            .multilineTextAlignment(.center)
+                                                            .padding(.bottom, 5)
+                                                        //Text("\(String(movie.director.first ?? "null")),\(String(movie.releaseYear ?? "null"))")
+                                                        //Text("\(String(movie.plotText ?? "null"))")
+                                                            .multilineTextAlignment(.center)
+                                                        
+                                                        HStack {
+                                                            ForEach(1...5, id: \.self) { index in
+                                                                Image(systemName: index <= review.rating ? "star.fill" : "star")
+                                                                    .resizable()
+                                                                    .frame(width: 30, height: 30)
+                                                                    .foregroundColor(index <= review.rating ? .orange : .black)
+                                                            }
+                                                        }
+                                                    }
+                                                    .padding(.horizontal)
                                                 }
+                                                
+                                                HStack {
+                                                    //Text("출연자:\(String(movie.director.first ?? "null"))")
+                                                        //.lineLimit(1)
+                                                        //.truncationMode(.tail)
+                                                    
+                                                    Spacer()
+                                                    
+                                                    //Text(Tags)
+                                                        //.lineLimit(1)
+                                                        //.truncationMode(.tail)
+                                                }
+                                                .padding(.horizontal)
+                                                .padding(.top, 5)
                                             }
-                                        }
-                                        .padding(.horizontal)
-                                    }
-                                    
-                                    HStack {
-                                        //Text("출연자:\(String(movie.director.first ?? "null"))")
-                                            //.lineLimit(1)
-                                            //.truncationMode(.tail)
-                                        
-                                        Spacer()
-                                        
-                                        //Text(Tags)
-                                            //.lineLimit(1)
-                                            //.truncationMode(.tail)
-                                    }
-                                    .padding(.horizontal)
-                                    .padding(.top, 5)
+                                        )
                                 }
-                            )
-                    }
-                }
-                .background(Color.white.opacity(0.3))
-                .frame(height: 300)
+                            }
+                            .background(Color.white.opacity(0.3))
+                            .frame(height: 300)
                 
-                VStack(alignment: .leading, spacing: 20){
+                VStack(alignment: .leading, spacing: 20) {
+                    
+                    // 리뷰 정보 표시
                     Text("Watched on: \(review.watchDate.formatted(date: .long, time: .omitted))")
                         .font(.subheadline)
                     
@@ -359,7 +406,8 @@ struct FullReviewView: View {
                         .font(.subheadline)
                     
                     Divider()
-                    // 커스텀 필드 출력
+                    
+                    // 커스텀 필드 표시
                     if let customFields = review.customFields, !customFields.isEmpty {
                         Text("Custom Fields:")
                             .font(.headline)
@@ -370,49 +418,56 @@ struct FullReviewView: View {
                                     .bold()
                                 Text(field.value)
                             }
-                            .padding(.vertical, 2)
                         }
                     } else {
                         Text("No custom fields added.")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
+                    
                     Divider()
                     
-                    // 리뷰 텍스트 출력
+                    // 상세 리뷰 텍스트
                     Text("Review:")
                         .font(.headline)
                     Text(review.reviewText)
                         .font(.body)
-                    
-                    
-
                 }
                 .padding()
                 
                 Spacer()
-            } // 가장 상위 vstack
-        } //scrollview
+                
+                // 수정 버튼
+                Button("Edit Review") {
+                    // 수정 화면으로 이동
+                    dismiss()
+                }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color.blue.opacity(0.7))
+                .foregroundColor(.white)
+                .cornerRadius(8)
+            }
+        }
         .navigationTitle("Review Details")
     }
 }
 
-
 #Preview {
     let dummyMovie = Movie(
-               title: "Dummy Movie Title",
-               director: ["John Doe"],
-               releaseYear: "2023",
-               poster: nil,
-               still: nil,
-               genre: ["Drama", "Thriller"],
-               keyword: ["Suspense", "Mystery"],
-               plotText: "A thrilling tale of suspense and mystery."
-           )
+        title: "Dummy Movie Title",
+        director: ["John Doe"],
+        releaseYear: "2023",
+        poster: nil,
+        still: nil,
+        genre: ["Drama", "Thriller"],
+        keyword: ["Suspense", "Mystery"],
+        plotText: "A thrilling tale of suspense and mystery."
+    )
     
     // 샘플 데이터를 위한 SwiftData 컨테이너 설정
-    let container = try! ModelContainer(for: Review.self, CustomField.self)
+    let container = try! ModelContainer(for: Review.self, CustomField.self, MovieStorage.self)
 
     ReviewView(movie: dummyMovie)
-        .modelContainer(container) 
+        .modelContainer(container)
 }
