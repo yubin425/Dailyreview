@@ -25,18 +25,25 @@ struct DailyReviewApp: App {
     
     var body: some Scene {
         WindowGroup {
-            let dummyMovie = Movie(
-                id: UUID(), // UUID 추가
-                title: "Dummy Movie Title",
-                director: ["John Doe"],
-                releaseYear: "2023",
-                poster: nil,
-                still: nil,
-                genre: ["Drama", "Thriller"],
-                keyword: ["Suspense", "Mystery"],
-                plotText: "A thrilling tale of suspense and mystery."
-            )
-            ReviewView(movie: dummyMovie)
+            let dummyMovie = MovieStorage(
+                    id:     UUID(),
+                    title: "Dummy Movie Title",
+                    director: ["John Doe"],
+                    releaseYear: "2023",
+                    poster: nil,
+                    still: nil,
+                    genre: ["Drama", "Thriller"],
+                    keyword: ["Suspense", "Mystery"],
+                    plotText: "A thrilling tale of suspense and mystery."
+                   )
+            
+            let sampleReviews = [
+                Review(movieStorage:dummyMovie, reviewText: "Great movie!", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
+                Review(movieStorage:dummyMovie, reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie"),
+                Review(movieStorage:dummyMovie, reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan")
+            ]
+            
+            ReviewQueryView(reviews: sampleReviews)
                 .modelContainer(modelContainer)
         }
     }
