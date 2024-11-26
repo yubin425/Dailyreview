@@ -190,6 +190,7 @@ struct EditReviewView: View {
                 initializeLocalState()
             }
         }
+        .navigationBarBackButtonHidden()
     }
 
     @ViewBuilder

@@ -245,6 +245,7 @@ struct ReviewView: View {
                     }
                     .sheet(isPresented: $showReviewField) {
                         ReviewTextEditorView(reviewText: $reviewText)
+                            .presentationDragIndicator(.visible)
                     }
                 }
                 .padding()

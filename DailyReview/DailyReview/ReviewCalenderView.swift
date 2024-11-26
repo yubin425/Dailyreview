@@ -152,6 +152,7 @@ struct ReviewCalendarView: View {
         .sheet(isPresented: $showFullReview) {
             if !selectedReviews.isEmpty {
                 FullReviewView(review: selectedReviews[currentReviewIndex])
+                    .presentationDragIndicator(.visible)
             }
         }
     }

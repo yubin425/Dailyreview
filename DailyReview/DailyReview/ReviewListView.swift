@@ -54,7 +54,7 @@ struct ReviewListView: View {
         .sheet(isPresented: $showFullReview) {
             if let review = selectedReview {
                 FullReviewView(review: review)
-
+                    .presentationDragIndicator(.visible)
             }
         }
     }
