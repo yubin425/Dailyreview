@@ -97,7 +97,7 @@ struct DetailView: View {
                 }
                 if fromWishlist != true{
                     Button(action:{
-                        if !wishListFolder.wishLists.isEmpty{
+                        if wishListFolder.wishLists.count > 1{
                             selectWishlist = true
                         }
                         else{
