@@ -58,6 +58,7 @@ struct DailyReviewApp: App {
                 .modelContainer(modelContainer)
             
             //ReviewQueryView(reviews: sampleReviews)
+
         }
     }
 
