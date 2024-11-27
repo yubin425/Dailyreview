@@ -16,7 +16,7 @@ struct DailyReviewApp: App {
     init() {
         do {
             // 필요한 모든 모델 등록
-            self.modelContainer = try ModelContainer(for: Review.self, CustomField.self, MovieStorage.self)
+            self.modelContainer = try ModelContainer(for: Review.self, CustomField.self, MovieStorage.self, CustomFieldLayout.self)
         } catch {
             print("Error creating model container: \(error)")
             fatalError("Failed to create model container: \(error)")
@@ -54,10 +54,10 @@ struct DailyReviewApp: App {
                 Review(movieStorage:dummyMovie, reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie"),
                 Review(movieStorage:dummyMovie, reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan")
             ]
-//            ReviewView(movie: dumMovie)
-//                .modelContainer(modelContainer)
+            ReviewView(movie: dumMovie)
+                .modelContainer(modelContainer)
             
-            ReviewQueryView(reviews: sampleReviews)
+            //ReviewQueryView(reviews: sampleReviews)
         }
     }
 
