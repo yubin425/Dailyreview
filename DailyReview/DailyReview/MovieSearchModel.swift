@@ -23,7 +23,7 @@ class MovieSearchModel: ObservableObject {
             .handleEvents(receiveOutput: { data in
                 // JSON 데이터를 문자열로 출력하여 응답을 확인
                 if let jsonString = String(data: data, encoding: .utf8) {
-                    print("JSON Response: \(jsonString)") // JSON 데이터 출력
+                    print("JSON Response:")// \(jsonString)") // JSON 데이터 출력
                 }
             })
             .decode(type: MovieResponse.self, decoder: JSONDecoder())

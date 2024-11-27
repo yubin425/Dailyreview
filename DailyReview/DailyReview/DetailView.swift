@@ -10,7 +10,10 @@ import SwiftUI
 
 struct DetailView: View {
     var movie: Movie // 선택된 영화의 상세 정보
-    
+    var fromWishlist: Bool?
+    @EnvironmentObject var wishListFolder: WishListFolder  // 환경 객체로 WishListFolder를 받음
+    @State private var selectWishlist = false
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
@@ -85,20 +88,36 @@ struct DetailView: View {
             }
             .padding()
             HStack {
-                NavigationLink(destination: WishlistView(movie: movie)) {
+                NavigationLink(destination: ReviewView(movie: movie)) {
                     Text("리뷰 추가")
                         .foregroundColor(.white)
                         .padding()
                         .background(Color.blue)
                         .cornerRadius(10)
                 }
-                
-                NavigationLink(destination: WishlistView(movie: movie)) {
-                    Text("위시리스트 추가")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.green)
-                        .cornerRadius(10)
+                if fromWishlist != true{
+                    Button(action:{
+                        if wishListFolder.wishLists.count > 1{
+                            selectWishlist = true
+                        }
+                        else{
+                            let firstWLName = "wishlist"
+                            wishListFolder.wishLists[firstWLName] = [Movie]()
+                            wishListFolder.addMovieToWishList(name: firstWLName, movie: movie)
+                        }
+                    })
+                    {
+                        Text("위시리스트 추가")
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.green)
+                            .cornerRadius(10)
+                    }
+                    .actionSheet(isPresented: $selectWishlist){
+                        ActionSheet(title: Text("Select WishList"), message: nil, buttons:wishListFolder.wishLists.keys.map{title in
+                            ActionSheet.Button.default(Text(title)){wishListFolder.addMovieToWishList(name: title, movie: movie)}
+                        })
+                    }
                 }
             }
             .padding(.top, 20)
