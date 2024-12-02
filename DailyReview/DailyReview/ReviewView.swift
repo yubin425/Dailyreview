@@ -6,7 +6,7 @@ import Foundation
 final class CustomFieldLayout {
     var id: UUID = UUID()
     var name: String
-    var fields: [CustomField] // Save fields as part of the layout
+    var fields: [CustomField]
     
     init(name: String, fields: [CustomField]) {
         self.name = name
@@ -124,9 +124,9 @@ struct ReviewView: View {
         customFields.removeAll()
     }
     
-    private func saveCurrentLayout() {
+    private func saveCurrentLayout(name:String) {
         guard !customFields.isEmpty else { return }
-        let layoutName = "레이아웃 \(savedLayouts.count + 1)"
+        let layoutName = "\(name)"
         let newLayout = CustomFieldLayout(name: layoutName, fields: customFields)
         savedLayouts.append(newLayout)
         modelContext.insert(newLayout) // SwiftData에 저장
@@ -141,7 +141,7 @@ struct ReviewView: View {
 
     private func loadLayout(_ layout: CustomFieldLayout) {
         customFields = layout.fields.map {
-            CustomField(name: $0.name, value: $0.value)
+            CustomField(name: $0.name, value: "")
         }
     }
     private func fetchSavedLayouts() {
@@ -152,6 +152,11 @@ struct ReviewView: View {
             savedLayouts = []
         }
     }
+    private func resetToDefaultLayout() {
+        // 커스텀 필드 배열 초기화
+        customFields.removeAll()
+    }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -245,43 +250,32 @@ struct ReviewView: View {
                             TextField("영화를 같이 본 친구", text: $friends)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
-                    }
-                           // 레이아웃
-                    VStack {
-                        Text("레이아웃 선택")
+                        
+                        // 레이아웃
+                        Text("커스텀 정보")
                             .font(.headline)
+                            .padding(.top)
                         
-                        Picker("레이아웃", selection: $selectedLayout) {
-                            Text("선택된 레이아웃 없음").tag(nil as CustomFieldLayout?)
-                            ForEach(savedLayouts, id: \.id) { layout in
-                                Text(layout.name).tag(layout as CustomFieldLayout?)
+                        HStack{
+                            Text("레이아웃:")
+                                .font(.body)
+                            Picker("레이아웃 선택", selection: $selectedLayout) {
+                                Text("선택된 레이아웃 없음").tag(nil as CustomFieldLayout?)
+                                ForEach(savedLayouts, id: \.id) { layout in
+                                    Text(layout.name).tag(layout as CustomFieldLayout?)
+                                }
                             }
-                        }
-                        .onChange(of: selectedLayout) { layout in
-                            if let layout = layout {
-                                loadLayout(layout)
+                            .onChange(of: selectedLayout) { layout in
+                                if let layout = layout {
+                                    loadLayout(layout)
+                                }
+                                else {
+                                    resetToDefaultLayout() // 선택된 레이아웃 없음 처리
+                                }
                             }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        
-                        Button("새 레이아웃 저장하기") {
-                            showSaveLayoutModal = true
-                        }
-                        .padding()
-                        .background(Color.blue.opacity(0.7))
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                        
-                        // Delete Layout Button
-                        if let selectedLayout = selectedLayout {
-                        Button("레이아웃 삭제") {
-                            deleteLayout(selectedLayout)
-                            self.selectedLayout = nil // 선택 초기화
-                            }
-                                .foregroundColor(.red)
+                            .pickerStyle(MenuPickerStyle())
                         }
                     }
-                .padding()
                 .sheet(isPresented: $showSaveLayoutModal) {
                     SaveLayoutModal(isPresented: $showSaveLayoutModal, newLayoutName: $newLayoutName, saveAction: saveCurrentLayout)
                         .presentationDetents([.fraction(0.3)]) // 하단 모달 크기
@@ -310,17 +304,29 @@ struct ReviewView: View {
                         }
                         
                         HStack {
-                            TextField("새 필드 이름 입력", text: $newFieldName)
+                            TextField("새 항목 이름 입력", text: $newFieldName)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                             Button("추가") {
                                 addCustomField()
                             }
                         }
-                        
-                        Button("모든 커스텀 필드 리셋") {
-                            resetCustomFields()
+                        HStack{
+                            Button("레이아웃 저장") {
+                                showSaveLayoutModal = true
+                            }
+                            .padding()
+                            .foregroundColor(.blue)
+                            
+                            // Delete Layout Button
+                            if let selectedLayout = selectedLayout {
+                                Button("레이아웃 삭제") {
+                                    deleteLayout(selectedLayout)
+                                    self.selectedLayout = nil // 선택 초기화
+                                }
+                                .foregroundColor(.red)
+                            }
                         }
-                        .foregroundColor(.red)
+                        
                     }
                     
                     Button(action: {
@@ -421,7 +427,7 @@ struct ReviewView: View {
 struct SaveLayoutModal: View {
     @Binding var isPresented: Bool
     @Binding var newLayoutName: String
-    let saveAction: () -> Void
+    let saveAction: (String) -> Void
     
     var body: some View {
         VStack {
@@ -431,7 +437,7 @@ struct SaveLayoutModal: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
             Button("저장") {
-                saveAction()
+                saveAction(newLayoutName)
                 isPresented = false
             }
             .padding()

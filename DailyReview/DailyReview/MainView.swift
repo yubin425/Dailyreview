@@ -51,14 +51,14 @@ struct MainView: View {
                 .environmentObject(wishListFolder)
 
 
-            ReviewView()
-                .tabItem {
-                    VStack {
-                        Image(systemName: "pencil")
-                        Text("REVIEW")
-                    }
-                }
-                .tag(1)
+//            ReviewView()
+//                .tabItem {
+//                    VStack {
+//                        Image(systemName: "pencil")
+//                        Text("REVIEW")
+//                    }
+//                }
+//                .tag(1)
 
             WishListFolderView()
                 .tabItem {
