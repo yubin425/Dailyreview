@@ -19,13 +19,17 @@ struct DetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
-                // 포스터 이미지
-                AsyncImageView(_URL: movie.poster)
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 300)
-                    .cornerRadius(10)
-                    .padding(.bottom, 10)
+                Text(movie.title)
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .padding(.bottom, 5)
+//                // 포스터 이미지
+//                AsyncImageView(_URL: movie.poster)
+//                    .scaledToFit()
+//                    .frame(maxWidth: .infinity)
+//                    .frame(height: 300)
+//                    .cornerRadius(10)
+//                    .padding(.bottom, 10)
                 AsyncImageView(_URL: movie.still)
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
@@ -33,10 +37,6 @@ struct DetailView: View {
                     .cornerRadius(10)
                     .padding(.bottom, 10)
                 // 영화 제목
-                Text(movie.title)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding(.bottom, 5)
                 
                 // 감독 정보
                 Text("감독: \(movie.director.prefix(3).joined(separator: ", "))")
