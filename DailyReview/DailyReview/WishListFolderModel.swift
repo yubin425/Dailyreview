@@ -6,39 +6,34 @@
 //
 
 import SwiftUI
+import SwiftData
 
-class WishListFolder: ObservableObject {
-    @Published var wishLists: [String:[Movie]] = [:]
+@Model
+class WishListFolder:Identifiable {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    @Relationship var movies:[MovieStorage] = []
     
-    // 새로운 위시리스트 추가
-    func addNewWishList(name: String) {
-        wishLists[name] = []
+    init(name: String) {
+        self.id = UUID()
+        self.name = name
     }
     
-    func deleteWishList(name: String) {
-        wishLists.removeValue(forKey: name)
+    func addMovie(_ movie: MovieStorage) {
+        if !movies.contains(where: { $0.id == movie.id }) {
+            movies.append(movie)
+        }
     }
 
-    func addMovieToWishList(name: String, movie: Movie) {
-        guard let wishList = wishLists[name] else { return }
-        
-        if !wishList.contains(where: { $0.id == movie.id }) {
-            wishLists[name]?.append(movie)
+    // 영화 제거
+    func removeMovie(_ movie: MovieStorage) {
+        if let index = movies.firstIndex(where: { $0.id == movie.id }) {
+            movies.remove(at: index)
         }
     }
-    
-    func removeMovieToWishList(name: String, movie: Movie) {
-        if let index = wishLists[name]?.firstIndex(where: { $0.id == movie.id }) {
-            wishLists[name]?.remove(at: index)
-        }
-    }
-    
-    func getPoster(name: String) -> String? {
-        if let wishList = wishLists[name] {
-            if let movie = wishList.first {
-                return movie.poster
-            }
-        }
-        return nil
+
+    // 대표 포스터 가져오기
+    func getPoster() -> String? {
+        return movies.first?.poster
     }
 }

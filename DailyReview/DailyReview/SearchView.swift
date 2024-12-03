@@ -3,8 +3,7 @@ import SwiftUI
 
 struct SearchView: View {
     var Flag: String
-    @EnvironmentObject var wishListFolder: WishListFolder  // 환경 객체로 WishListFolder를 받음
-    var wishlistName: String?
+    var wishList: WishListFolder?
     @State private var isNavigating = false
     @StateObject private var viewModel = MovieSearchModel()
     @State private var query = ""
@@ -51,67 +50,41 @@ struct SearchView: View {
                 List(viewModel.movies) { theMovie in
                     if Flag == "wishlist" {
                         Button(action: {
-                            wishListFolder.addMovieToWishList(name: wishlistName!, movie:theMovie)
+                            wishList!.addMovie(theMovie.toStorage())
                         }){
-                            MovieHStack(theMovie: theMovie)
+                            movieInstanceView(movie: theMovie)
                         }
                     }
                     else {
                         NavigationLink(destination: DetailView(movie: theMovie)){
-                            MovieHStack(theMovie: theMovie)
+                            movieInstanceView(movie: theMovie)
                         }
                     }
                 }
-                
             }
             Spacer()
         }
     }
 }
 
-struct MovieHStack: View {
-    var theMovie: Movie
-    
-    var body: some View {
+struct movieInstanceView: View{
+    var movie: Movie
+
+    var body: some View{
         HStack{
-            // 포스터
-            if let posterURL = theMovie.poster,
-               let url = URL(string: posterURL){
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 50, height: 75)
-                    case .failure:
-                        Image(systemName: "photo")
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
-            } else {
-                Image(systemName: "photo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 75)
-            }
-            
-            // 영화 정보
+            AsyncImageView(_URL: movie.poster)
+                .scaledToFit()
+                .frame(width: 60, height: 90)
             VStack(alignment: .leading) {
-                Text(theMovie.title)
+                Text(movie.title)
                     .font(.headline)
-                Text("감독: \(theMovie.director.prefix(3).joined(separator: ", "))")
-                Text("개봉일: \(theMovie.releaseYear ?? "정보 없음")")
+                Text(movie.director.joined(separator: ", "))
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                Text("개봉일: \(movie.releaseYear ?? "정보 없음")")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
             }
         }
-    }
-}
-
-struct SearchView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchView(Flag : "main").environmentObject(WishListFolder())
     }
 }

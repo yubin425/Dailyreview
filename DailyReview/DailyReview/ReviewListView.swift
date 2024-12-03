@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct ReviewListView: View {
     @State private var navigateToEditView = false
@@ -66,8 +67,7 @@ struct ReviewSummaryView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(review.movieStorage.poster ?? "testImage")
-                .resizable()
+            AsyncImageView(_URL: review.movieStorage.poster)
                 .scaledToFit()
                 .frame(width: 60, height: 90)
                 .cornerRadius(5)
@@ -97,9 +97,10 @@ struct ReviewSummaryView: View {
 
 
 struct ReviewQueryView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var reviews: [Review]
     @State private var selectedView: ViewOption = .list // 기본은 리스트 뷰
     @State private var sortOption: ReviewListView.SortOption = .dateAs // 초기 정렬 옵션
-    let reviews: [Review]
     
     enum ViewOption {
         case calendar, list

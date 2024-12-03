@@ -40,9 +40,6 @@ class MovieStorage: ObservableObject, Identifiable {
     }
 }
 
-
-
-
 @Model
 class CustomField: ObservableObject, Identifiable {
     var id: UUID
@@ -162,8 +159,7 @@ struct ReviewView: View {
             ScrollView {
                 GeometryReader { geometry in
                     VStack {
-                        Image("testImage")
-                            .resizable()
+                        AsyncImageView(_URL: movie.poster)
                             .aspectRatio(contentMode: .fill)
                             .frame(width: geometry.size.width, height: 300)
                             .clipped()
@@ -171,8 +167,7 @@ struct ReviewView: View {
                             .overlay(
                                 VStack(alignment: .center) {
                                     HStack {
-                                        Image("testImage")
-                                            .resizable()
+                                        AsyncImageView(_URL: movie.still)
                                             .aspectRatio(contentMode: .fit)
                                             .frame(width: 150)
                                             .padding(.horizontal)
@@ -204,7 +199,7 @@ struct ReviewView: View {
                                     }
                                     
                                     HStack {
-                                        Text("출연자:\(String(movie.director.first ?? "null"))")
+                                        Text("출연자:\(String(movie.actor.first ?? "null"))")
                                             .lineLimit(1)
                                             .truncationMode(.tail)
                                         
@@ -350,17 +345,7 @@ struct ReviewView: View {
                 HStack {
                     Button("등록") {
                         // 영화 정보 저장
-                        let movieStorage = MovieStorage(
-                            id: movie.id,
-                            title: movie.title,
-                            director: movie.director,
-                            releaseYear: movie.releaseYear,
-                            poster: movie.poster,
-                            still: movie.still,
-                            genre: movie.genre,
-                            keyword: movie.keyword,
-                            plotText: movie.plotText
-                        )
+                        let movieStorage = movie.toStorage()
                         modelContext.insert(movieStorage) // SwiftData 컨텍스트에 삽입
 
                         // 리뷰 생성
@@ -447,6 +432,32 @@ struct SaveLayoutModal: View {
             .disabled(newLayoutName.isEmpty)
         }
         .padding()
+    }
+}
+
+struct AsyncImageView: View {
+    let _URL: String?
+
+    var body: some View {
+        if let rURL = _URL, let url = URL(string: rURL) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                case .success(let image):
+                    image
+                        .resizable()
+                case .failure:
+                    Image(systemName: "photo")
+                        .resizable()
+                @unknown default:
+                    EmptyView()
+                }
+            }
+        } else {
+            Image(systemName: "photo")
+                .resizable()
+        }
     }
 }
 

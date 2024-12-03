@@ -80,8 +80,7 @@ struct ReviewCalendarView: View {
                                         selectedReviews = dayReviews
                                         currentReviewIndex = 0
                                     }) {
-                                        Image(firstReview.movieStorage.poster ?? "testImage")
-                                            .resizable()
+                                        AsyncImageView(_URL: firstReview.movieStorage.poster)
                                             .scaledToFit()
                                             .frame(width: 40.5, height: 60)
                                             .cornerRadius(5)
