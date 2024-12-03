@@ -57,6 +57,7 @@ struct DailyReviewApp: App {
             ReviewView(movie: dumMovie)
                 .modelContainer(modelContainer)
             
+//            MainView()
             //ReviewQueryView(reviews: sampleReviews)
 
         }

@@ -8,11 +8,21 @@
 import SwiftUI
 
 struct MyPageView: View {
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+                   // Color Asset을 사용
+                   Text("다크 모드")
+                       .font(.title)
+                       .foregroundColor(Color("Positivecolor"))
+                       .padding()
+                   
+                   // Toggle 버튼
+                   Toggle("다크 모드", isOn: $isDarkMode)
+                       .padding()
+               }
+               .preferredColorScheme(isDarkMode ? .dark : .light) // 다크 모드 설정
+               .animation(.easeInOut, value: isDarkMode) // 애니메이션 효과
     }
-}
-
-#Preview {
-    MyPageView()
 }
