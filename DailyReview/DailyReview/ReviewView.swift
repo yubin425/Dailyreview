@@ -3,6 +3,44 @@ import SwiftData
 import Foundation
 
 @Model
+final class CustomFieldLayout {
+    var id: UUID = UUID()
+    var name: String
+    var fields: [CustomField]
+    
+    init(name: String, fields: [CustomField]) {
+        self.name = name
+        self.fields = fields
+    }
+}
+
+@Model
+class MovieStorage: ObservableObject, Identifiable {
+    var id: UUID
+    var title: String
+    var director: [String]
+    var releaseYear: String?
+    var poster: String?
+    var still: String?
+    var genre: [String]
+    var keyword: [String]
+    var plotText: String?
+    
+    
+    init(id: UUID, title: String, director: [String], releaseYear: String? = nil, poster: String? = nil, still: String? = nil, genre: [String], keyword: [String], plotText: String? = nil) {
+        self.id = id
+        self.title = Movie.cleanStr(from: title)
+        self.director = director.map { Movie.cleanStr(from: $0) }
+        self.releaseYear = releaseYear
+        self.poster = Movie.extractFirst(from: poster)?.replacingOccurrences(of: "http://", with: "https://")
+        self.still = Movie.extractFirst(from: still)?.replacingOccurrences(of: "http://", with: "https://")
+        self.genre = genre
+        self.keyword = keyword
+        self.plotText = plotText
+    }
+}
+
+@Model
 class CustomField: ObservableObject, Identifiable {
     var id: UUID
     var name: String
@@ -41,6 +79,7 @@ struct ReviewView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss // 이전 화면으로 복귀를 위한 dismiss 환경 변수
     
+    //리뷰 관련 변수
     @State private var selectedReview: Review? = nil // 이동할 리뷰 상태 저장
     @State private var reviewText = ""
     @State private var rating = 1
@@ -52,19 +91,26 @@ struct ReviewView: View {
     @State private var customFields: [CustomField] = []
     @State private var newFieldName: String = ""
     
-    @State private var isEditing = false // 편집 모드 활성화 여부
-    @State private var editingField: CustomField? = nil // 수정할 필드
-    
+    //뷰 이동&모달 여부
     @State private var showReviewField = false // 리뷰 입력창 표시 여부
     @State private var navigateToFullReview = false // FullReviewView로 이동 여부
     
+    //커스텀 필드 레이아웃
+    @State private var savedLayouts: [CustomFieldLayout] = []
+    @State private var selectedLayout: CustomFieldLayout? = nil
+    @State private var showSaveLayoutModal = false
+    @State private var newLayoutName: String = "" // 새로운 레이아웃 이름
+    
     let movie: Movie  // DetailView에서 전달받은 영화 정보
+    
+    //movie tag 추출용
     private var Tags: String {
         let genreTags = movie.genre.prefix(2).map { "#\($0)" }
         let keywordTag = movie.keyword.prefix(1).map { "#\($0)" }
         return (genreTags + keywordTag).joined(separator: " ")
     }
     
+    //커스텀 필드 추가, 삭제
     private func addCustomField() {
         guard !newFieldName.isEmpty else { return }
         customFields.append(CustomField(name: newFieldName, value: ""))
@@ -72,6 +118,39 @@ struct ReviewView: View {
     }
     
     private func resetCustomFields() {
+        customFields.removeAll()
+    }
+    
+    private func saveCurrentLayout(name:String) {
+        guard !customFields.isEmpty else { return }
+        let layoutName = "\(name)"
+        let newLayout = CustomFieldLayout(name: layoutName, fields: customFields)
+        savedLayouts.append(newLayout)
+        modelContext.insert(newLayout) // SwiftData에 저장
+    }
+    
+    private func deleteLayout(_ layout: CustomFieldLayout) {
+        if let index = savedLayouts.firstIndex(where: { $0.id == layout.id }) {
+            savedLayouts.remove(at: index)
+            modelContext.delete(layout) // SwiftData에서 삭제
+        }
+    }
+
+    private func loadLayout(_ layout: CustomFieldLayout) {
+        customFields = layout.fields.map {
+            CustomField(name: $0.name, value: "")
+        }
+    }
+    private func fetchSavedLayouts() {
+        do {
+            savedLayouts = try modelContext.fetch(FetchDescriptor<CustomFieldLayout>())
+        } catch {
+            print("Fetch failed: \(error)")
+            savedLayouts = []
+        }
+    }
+    private func resetToDefaultLayout() {
+        // 커스텀 필드 배열 초기화
         customFields.removeAll()
     }
     
@@ -166,9 +245,40 @@ struct ReviewView: View {
                             TextField("영화를 같이 본 친구", text: $friends)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
+                        
+                        // 레이아웃
+                        Text("커스텀 정보")
+                            .font(.headline)
+                            .padding(.top)
+                        
+                        HStack{
+                            Text("레이아웃:")
+                                .font(.body)
+                            Picker("레이아웃 선택", selection: $selectedLayout) {
+                                Text("선택된 레이아웃 없음").tag(nil as CustomFieldLayout?)
+                                ForEach(savedLayouts, id: \.id) { layout in
+                                    Text(layout.name).tag(layout as CustomFieldLayout?)
+                                }
+                            }
+                            .onChange(of: selectedLayout) { layout in
+                                if let layout = layout {
+                                    loadLayout(layout)
+                                }
+                                else {
+                                    resetToDefaultLayout() // 선택된 레이아웃 없음 처리
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
                     }
-                    
+                .sheet(isPresented: $showSaveLayoutModal) {
+                    SaveLayoutModal(isPresented: $showSaveLayoutModal, newLayoutName: $newLayoutName, saveAction: saveCurrentLayout)
+                        .presentationDetents([.fraction(0.3)]) // 하단 모달 크기
+                }
+
+                                // 커스텀 필드 추가
                     VStack(alignment: .leading) {
+
                         ForEach($customFields) { $field in
                             HStack {
                                 TextField("필드 이름", text: $field.name)
@@ -189,17 +299,29 @@ struct ReviewView: View {
                         }
                         
                         HStack {
-                            TextField("새 필드 이름 입력", text: $newFieldName)
+                            TextField("새 항목 이름 입력", text: $newFieldName)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                             Button("추가") {
                                 addCustomField()
                             }
                         }
-                        
-                        Button("모든 커스텀 필드 리셋") {
-                            resetCustomFields()
+                        HStack{
+                            Button("레이아웃 저장") {
+                                showSaveLayoutModal = true
+                            }
+                            .padding()
+                            .foregroundColor(.blue)
+                            
+                            // Delete Layout Button
+                            if let selectedLayout = selectedLayout {
+                                Button("레이아웃 삭제") {
+                                    deleteLayout(selectedLayout)
+                                    self.selectedLayout = nil // 선택 초기화
+                                }
+                                .foregroundColor(.red)
+                            }
                         }
-                        .foregroundColor(.red)
+                        
                     }
                     
                     Button(action: {
@@ -270,6 +392,9 @@ struct ReviewView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
                 }
+                .onAppear {
+                    fetchSavedLayouts()
+                }
                 .padding()
             }
             .navigationDestination(isPresented: $navigateToFullReview) {
@@ -281,6 +406,32 @@ struct ReviewView: View {
             }
             
         }
+    }
+}
+
+struct SaveLayoutModal: View {
+    @Binding var isPresented: Bool
+    @Binding var newLayoutName: String
+    let saveAction: (String) -> Void
+    
+    var body: some View {
+        VStack {
+            Text("새 레이아웃 저장")
+                .font(.headline)
+            TextField("레이아웃 이름 입력", text: $newLayoutName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            Button("저장") {
+                saveAction(newLayoutName)
+                isPresented = false
+            }
+            .padding()
+            .background(Color.blue.opacity(0.7))
+            .foregroundColor(.white)
+            .cornerRadius(8)
+            .disabled(newLayoutName.isEmpty)
+        }
+        .padding()
     }
 }
 
@@ -309,3 +460,4 @@ struct AsyncImageView: View {
         }
     }
 }
+

@@ -17,7 +17,7 @@ struct DailyReviewApp: App {
     init() {
         do {
             // 필요한 모든 모델 등록
-            self.modelContainer = try ModelContainer(for: Review.self, CustomField.self, MovieStorage.self, WishListFolder.self)
+            self.modelContainer = try ModelContainer(for: Review.self, CustomField.self, MovieStorage.self, CustomFieldLayout.self, WishListFolder.self)
             self.modelContext = ModelContext(self.modelContainer)
         } catch {
             print("Error creating model container: \(error)")

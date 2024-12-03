@@ -37,7 +37,6 @@ struct MainView: View {
                 }
                 .tag(0)
 
-
             ReviewQueryView()
                 .tabItem {
                     VStack {
