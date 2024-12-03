@@ -7,60 +7,31 @@
 
 
 import SwiftUI
+import SwiftData
 
 struct DetailView: View {
     var movie: Movie // 선택된 영화의 상세 정보
     var fromWishlist: Bool?
-    @EnvironmentObject var wishListFolder: WishListFolder  // 환경 객체로 WishListFolder를 받음
+    @Environment(\.modelContext) private var modelContext
+    @Query private var folders: [WishListFolder]
     @State private var selectWishlist = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 // 포스터 이미지
-                if let posterURL = movie.poster,
-                    let url = URL(string: posterURL.replacingOccurrences(of: "http://", with: "https://")){
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView()
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: .infinity)
-                        case .failure:
-                            Image(systemName: "photo")
-                        @unknown default:
-                            EmptyView()
-                        }
-                    }
+                AsyncImageView(_URL: movie.poster)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
                     .frame(height: 300)
                     .cornerRadius(10)
                     .padding(.bottom, 10)
-                }
-                if let stillURL = movie.still,
-                        let url = URL(string: stillURL.replacingOccurrences(of: "http://", with: "https://")){
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .empty:
-                                ProgressView()
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: .infinity)
-                            case .failure:
-                                Image(systemName: "photo")
-                            @unknown default:
-                                EmptyView()
-                            }
-                        }
-                        .frame(height: 300)
-                        .cornerRadius(10)
-                        .padding(.bottom, 10)
-                    }
-
+                AsyncImageView(_URL: movie.still)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 300)
+                    .cornerRadius(10)
+                    .padding(.bottom, 10)
                 // 영화 제목
                 Text(movie.title)
                     .font(.largeTitle)
@@ -97,13 +68,16 @@ struct DetailView: View {
                 }
                 if fromWishlist != true{
                     Button(action:{
-                        if wishListFolder.wishLists.count > 1{
+                        if folders.count > 1{
                             selectWishlist = true
+                        }
+                        else if folders.count == 1{
+                            folders.first!.addMovie(movie.toStorage())
                         }
                         else{
                             let firstWLName = "wishlist"
-                            wishListFolder.wishLists[firstWLName] = [Movie]()
-                            wishListFolder.addMovieToWishList(name: firstWLName, movie: movie)
+                            modelContext.insert(WishListFolder(name: firstWLName))
+                            folders.first!.addMovie(movie.toStorage())
                         }
                     })
                     {
@@ -114,8 +88,8 @@ struct DetailView: View {
                             .cornerRadius(10)
                     }
                     .actionSheet(isPresented: $selectWishlist){
-                        ActionSheet(title: Text("Select WishList"), message: nil, buttons:wishListFolder.wishLists.keys.map{title in
-                            ActionSheet.Button.default(Text(title)){wishListFolder.addMovieToWishList(name: title, movie: movie)}
+                        ActionSheet(title: Text("Select WishList"), message: nil, buttons:folders.map {folder in
+                            ActionSheet.Button.default(Text(folder.name)){folder.addMovie(movie.toStorage())}
                         })
                     }
                 }

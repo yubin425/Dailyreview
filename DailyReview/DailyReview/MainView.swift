@@ -6,14 +6,8 @@
 //
 
 import SwiftUI
+import SwiftData
 import UIKit
-
-struct MainView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainView()
-            .edgesIgnoringSafeArea(.all)
-    }
-}
 
 struct SearchResultsView: View {
     var body: some View {
@@ -26,16 +20,10 @@ struct SearchResultsView: View {
     }
 }
 
-struct MainView: View {
+struct MainView: View {    
     @State private var selectedTab = 0
-    @State private var wishListFolder = WishListFolder()
-
-    init() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
-    }
+    @Environment(\.modelContext) private var modelContext: ModelContext
+    @Query var wishListFolder: [WishListFolder]
 
 
     var body: some View {
@@ -48,10 +36,9 @@ struct MainView: View {
                     }
                 }
                 .tag(0)
-                .environmentObject(wishListFolder)
 
 
-            ReviewView()
+            ReviewQueryView()
                 .tabItem {
                     VStack {
                         Image(systemName: "pencil")
@@ -68,7 +55,6 @@ struct MainView: View {
                     }
                 }
                 .tag(2)
-                .environmentObject(wishListFolder)
 
             MyPageView()
                 .tabItem {

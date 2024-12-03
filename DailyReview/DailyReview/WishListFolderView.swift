@@ -1,9 +1,10 @@
 import SwiftUI
+import SwiftData
 
 struct WishListFolderView: View {
-    @EnvironmentObject var wishListFolder: WishListFolder
+    @Environment(\.modelContext) private var modelContext
+    @Query private var folders: [WishListFolder]
     @State private var searchText = ""
-    @State private var delete = false
     
     var body: some View {
         NavigationStack{
@@ -18,16 +19,6 @@ struct WishListFolderView: View {
                                 .font(.system(size: 20, weight: .bold))
                                 .frame(width: 50, height: 50)
                                 .background(Color.green.opacity(0.8))
-                                .foregroundColor(.white)
-                                .clipShape(Circle())
-                        }
-                        Button(action: {
-                            delete.toggle()
-                        }) {
-                            Text(delete ? "취소" : "제거")
-                                .font(.system(size: 20, weight: .bold))
-                                .frame(width: 50, height: 50)
-                                .background(Color.red.opacity(0.8))
                                 .foregroundColor(.white)
                                 .clipShape(Circle())
                         }
@@ -57,92 +48,44 @@ struct WishListFolderView: View {
                 // 목록
                 VStack{
                     // 위시리스트가 없다면 안내 메시지
-                    if wishListFolder.wishLists.isEmpty {
+                    if folders.isEmpty {
                         Text("위시리스트가 없습니다.")
                             .foregroundColor(.gray)
                             .padding()
                     } else {
                         // 위시리스트 목록
                         List {
-                            ForEach(wishListFolder.wishLists.keys.sorted().filter{ $0.lowercased().contains(searchText.lowercased()) || searchText == ""}, id: \.self) { name in
-                                if delete {
-                                    Button(action: {
-                                        wishListFolder.deleteWishList(name:name)
-                                    }) {
-                                        HStack {
-                                            if let posterUrl = wishListFolder.getPoster(name: name), let url = URL(string: posterUrl) {
-                                                    AsyncImage(url: url) { phase in
-                                                        switch phase {
-                                                        case .empty:
-                                                            ProgressView()
-                                                        case .success(let image):
-                                                            image.resizable().scaledToFit().frame(width: 60, height: 90)
-                                                        case .failure:
-                                                            Image(systemName: "film").resizable().scaledToFit().frame(width: 60, height: 90)
-                                                        @unknown default:
-                                                            EmptyView()
-                                                        }
-                                                    }
-                                                } else {
-                                                    Image(systemName: "film.fill")
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .frame(width: 60, height: 90)
-                                                        .foregroundColor(.blue)
-                                                }
-                                            Text(name)
-                                                .foregroundColor(Color.black)
-                                            Spacer()
-                                            Image(systemName: "trash").foregroundColor(.red)
-                                                .frame(alignment: .trailing)
-                                        }
+                            ForEach(folders.filter{ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText)}) { folder in
+                                NavigationLink(destination: WishListView(wishListFolder: folder)) {
+                                    HStack {
+                                        AsyncImageView(_URL: folder.getPoster())
+                                            .scaledToFit()
+                                            .frame(width: 60, height: 90)
+                                        Text(folder.name)
                                     }
                                 }
-                                else {
-                                    NavigationLink(destination: WishListView(name: name).environmentObject(wishListFolder)) {
-                                        HStack {
-                                            if let posterUrl = wishListFolder.getPoster(name: name), let url = URL(string: posterUrl) {
-                                                AsyncImage(url: url) { phase in
-                                                    switch phase {
-                                                    case .empty:
-                                                        ProgressView()
-                                                    case .success(let image):
-                                                        image.resizable().scaledToFit().frame(width: 60, height: 90)
-                                                    case .failure:
-                                                        Image(systemName: "film").resizable().scaledToFit().frame(width: 60, height: 90)
-                                                    @unknown default:
-                                                        EmptyView()
-                                                    }
-                                                }
-                                            } else {
-                                                Image(systemName: "film.fill")
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 60, height: 90)
-                                                    .foregroundColor(.blue)
-                                            }
-                                            Text(name)
-                                        }
-                                    }
-                                }
-                                
                             }
+                            .onDelete(perform: deleteFolder)
                         }
                     }
                 }
                 Spacer()
             }
         }
-        .onAppear(perform: {wishListFolder.addNewWishList(name: "as")})
+    }
+    private func deleteFolder(at offsets: IndexSet) {
+        for index in offsets {
+            let folderToDelete = folders[index]
+            modelContext.delete(folderToDelete) // SwiftData에서 삭제
+        }
     }
 }
 
 
 struct WishListFolderAddView: View {
-    @EnvironmentObject var wishListFolder: WishListFolder
     @Environment(\.presentationMode) var presentationMode // 네비게이션 제어용
     @State private var wishlistTitle: String = ""
-
+    @Environment(\.modelContext) private var modelContext // SwiftData 컨텍스트
 
     var body: some View {
         NavigationView {
@@ -155,7 +98,13 @@ struct WishListFolderAddView: View {
                     .textFieldStyle(PlainTextFieldStyle())
                 
                 Button(action: {
-                    wishListFolder.addNewWishList(name: wishlistTitle)
+                    let newFolder = WishListFolder(name: wishlistTitle)
+                    modelContext.insert(newFolder)
+                    do {
+                        try modelContext.save()
+                    } catch {
+                        print("Failed to save new folder: \(error)")
+                    }
                     presentationMode.wrappedValue.dismiss()
                 })
                 {
@@ -176,40 +125,25 @@ struct WishListFolderAddView: View {
 
 
 struct WishListView: View {
-    @EnvironmentObject var wishListFolder: WishListFolder  // 환경 객체로 WishListFolder를 받음
-    var name:String
+    var wishListFolder: WishListFolder
     @State private var delete = false
     
     var body: some View {
-        let wishList = wishListFolder.wishLists[name]!
+        let wishList = wishListFolder
         NavigationView {
             VStack {
-                if wishList.isEmpty {
+                if wishList.movies.isEmpty {
                     Text("위시리스트가 비어 있습니다.")
                         .foregroundColor(.gray)
                         .padding()
                 } else {
                     List {
-                        ForEach(wishList) { movie in
-                            if delete {
-                                Button(action: {
-                                    wishListFolder.removeMovieToWishList(name: name, movie: movie)
-                                }) {
-                                    HStack {
-                                        movieInstance(movie:movie, name:name)
-                                        Spacer()
-                                        Image(systemName: "trash").foregroundColor(.red)
-                                            .frame(alignment: .trailing)
-                                    }
-                                }
+                        ForEach(wishList.movies) { movie in
+                            NavigationLink(destination: DetailView(movie:movie.toMovie(), fromWishlist: true)){
+                                movieInstanceView(movie:movie.toMovie())
                             }
-                            else {
-                                NavigationLink(destination: DetailView(movie:movie, fromWishlist: true)){
-                                    movieInstance(movie:movie, name:name)
-                                }
-                            }
-                            
                         }
+                        .onDelete(perform: deleteMovie)
                     }
                 }
             }
@@ -217,7 +151,7 @@ struct WishListView: View {
 
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Text(name) // 네비게이션 타이틀을 왼쪽에 위치
+                    Text(wishList.name) // 네비게이션 타이틀을 왼쪽에 위치
                         .font(.headline)
                         .foregroundColor(.primary)
                 }
@@ -225,22 +159,12 @@ struct WishListView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack (spacing:10){
                         // 새로운 위시리스트 추가 버튼
-                        NavigationLink(destination: SearchView(Flag: "wishlist",wishlistName: name).environmentObject(wishListFolder))
+                        NavigationLink(destination: SearchView(Flag: "wishlist",wishList: wishList))
                         {
                             Text("추가")
                                 .font(.system(size: 18, weight: .bold))
                                 .frame(width: 40, height: 40)
                                 .background(Color.green.opacity(0.8))
-                                .foregroundColor(.white)
-                                .clipShape(Circle())
-                        }
-                        Button(action: {
-                            delete.toggle()
-                        }) {
-                            Text(delete ? "취소" : "제거")
-                                .font(.system(size: 18, weight: .bold))
-                                .frame(width: 40, height: 40)
-                                .background(Color.red.opacity(0.8))
                                 .foregroundColor(.white)
                                 .clipShape(Circle())
                         }
@@ -250,48 +174,10 @@ struct WishListView: View {
             }
         }
     }
-}
-
-struct movieInstance: View{
-    var movie: Movie
-    var name: String
-    @EnvironmentObject var wishListFolder: WishListFolder
-
-    var body: some View{
-        HStack{
-            if let posterUrl = movie.poster, let url = URL(string: posterUrl) {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                    case .success(let image):
-                        image.resizable().scaledToFit().frame(width: 60, height: 90)
-                    case .failure:
-                        Image(systemName: "film").resizable().scaledToFit().frame(width: 60, height: 90)
-                    @unknown default:
-                        EmptyView()
-                    }
-                }
-            } else {
-                Image(systemName: "photo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 75)
-            }
-            VStack(alignment: .leading) {
-                Text(movie.title)
-                    .font(.headline)
-                Text(movie.director.joined(separator: ", "))
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
+    private func deleteMovie(at offsets: IndexSet) {
+        for index in offsets {
+            let movie = wishListFolder.movies[index]
+            wishListFolder.removeMovie(movie)
         }
-    }
-}
-
-
-struct WLFView_Previews: PreviewProvider {
-    static var previews: some View {
-        WishListFolderView().environmentObject(WishListFolder())
     }
 }

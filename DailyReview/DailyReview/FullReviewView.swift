@@ -13,8 +13,7 @@ struct FullReviewView: View {
                     // 포스터 표시
                     GeometryReader { geometry in
                         VStack {
-                            Image("testImage")
-                                .resizable()
+                            AsyncImageView(_URL: review.movieStorage.poster)
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: geometry.size.width, height: 300)
                                 .clipped()
@@ -22,8 +21,7 @@ struct FullReviewView: View {
                                 .overlay(
                                     VStack(alignment: .center) {
                                         HStack {
-                                            Image("testImage")
-                                                .resizable()
+                                            AsyncImageView(_URL: review.movieStorage.still)
                                                 .aspectRatio(contentMode: .fit)
                                                 .frame(width: 150)
                                                 .padding(.horizontal)
@@ -197,8 +195,7 @@ struct EditReviewView: View {
     private func movieHeaderView() -> some View {
         GeometryReader { geometry in
             VStack {
-                Image("testImage")
-                    .resizable()
+                AsyncImageView(_URL: review.movieStorage.poster)
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geometry.size.width, height: 300)
                     .clipped()
@@ -206,8 +203,7 @@ struct EditReviewView: View {
                     .overlay(
                         VStack(alignment: .center) {
                             HStack {
-                                Image("testImage")
-                                    .resizable()
+                                AsyncImageView(_URL: review.movieStorage.still)
                                     .aspectRatio(contentMode: .fit)
                                     .frame(width: 150)
                                     .padding(.horizontal)
@@ -239,7 +235,7 @@ struct EditReviewView: View {
                             }
                             
                             HStack {
-                                Text("출연자:\(String(review.movieStorage.director.first ?? "null"))")
+                                Text("출연자:\(String(review.movieStorage.actor.first ?? "null"))")
                                     .lineLimit(1)
                                     .truncationMode(.tail)
                                 

@@ -12,11 +12,13 @@ import SwiftData
 struct DailyReviewApp: App {
     // SwiftData 모델 컨테이너를 생성
     private var modelContainer: ModelContainer
+    @State private var modelContext: ModelContext
     
     init() {
         do {
             // 필요한 모든 모델 등록
-            self.modelContainer = try ModelContainer(for: Review.self, CustomField.self, MovieStorage.self)
+            self.modelContainer = try ModelContainer(for: Review.self, CustomField.self, MovieStorage.self, WishListFolder.self)
+            self.modelContext = ModelContext(self.modelContainer)
         } catch {
             print("Error creating model container: \(error)")
             fatalError("Failed to create model container: \(error)")
@@ -25,40 +27,8 @@ struct DailyReviewApp: App {
     
     var body: some Scene {
         WindowGroup {
-            let dummyMovie = MovieStorage(
-                    id:     UUID(),
-                    title: "Dummy Movie Title",
-                    director: ["John Doe"],
-                    releaseYear: "2023",
-                    poster: nil,
-                    still: nil,
-                    genre: ["Drama", "Thriller"],
-                    keyword: ["Suspense", "Mystery"],
-                    plotText: "A thrilling tale of suspense and mystery."
-                   )
-            let dumMovie = Movie(
-                    id:     UUID(),
-                    title: "Dummy Movie Title",
-                    director: ["John Doe"],
-                    releaseYear: "2023",
-                    poster: nil,
-                    still: nil,
-                    genre: ["Drama", "Thriller"],
-                    keyword: ["Suspense", "Mystery"],
-                    plotText: "A thrilling tale of suspense and mystery."
-                   )
-            
-            let sampleReviews = [
-                Review(movieStorage:dummyMovie, reviewText: "Great movie!", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "Cinema A", friends: "Alice, Bob"),
-                Review(movieStorage:dummyMovie, reviewText: "wowow", rating: 5, watchDate: Calendar.current.date(byAdding: .day, value: -3, to: Date())!, watchLocation: "my house", friends: "my friends"),
-                Review(movieStorage:dummyMovie, reviewText: "Not bad", rating: 3, watchDate: Calendar.current.date(byAdding: .day, value: -1, to: Date())!, watchLocation: "Cinema B", friends: "Charlie"),
-                Review(movieStorage:dummyMovie, reviewText: "Loved it", rating: 4, watchDate: Calendar.current.date(byAdding: .day, value: 2, to: Date())!, watchLocation: "Cinema C", friends: "Diana, Evan")
-            ]
-//            ReviewView(movie: dumMovie)
-//                .modelContainer(modelContainer)
-            
-            ReviewQueryView(reviews: sampleReviews)
-
+            MainView()
+                .environment(\.modelContext, modelContext)
         }
     }
 
