@@ -10,23 +10,26 @@ import SwiftData
 
 @main
 struct DailyReviewApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+    // SwiftData 모델 컨테이너를 생성
+    private var modelContainer: ModelContainer
+    @State private var modelContext: ModelContext
+    
+    init() {
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            // 필요한 모든 모델 등록
+            self.modelContainer = try ModelContainer(for: Review.self, CustomField.self, MovieStorage.self, WishListFolder.self)
+            self.modelContext = ModelContext(self.modelContainer)
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            print("Error creating model container: \(error)")
+            fatalError("Failed to create model container: \(error)")
         }
-    }()
-
+    }
+    
     var body: some Scene {
         WindowGroup {
             MainView()
+                .environment(\.modelContext, modelContext)
         }
-        .modelContainer(sharedModelContainer)
     }
+
 }
