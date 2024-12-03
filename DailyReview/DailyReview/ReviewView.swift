@@ -14,31 +14,6 @@ final class CustomFieldLayout {
     }
 }
 
-@Model
-class MovieStorage: ObservableObject, Identifiable {
-    var id: UUID
-    var title: String
-    var director: [String]
-    var releaseYear: String?
-    var poster: String?
-    var still: String?
-    var genre: [String]
-    var keyword: [String]
-    var plotText: String?
-    
-    
-    init(id: UUID, title: String, director: [String], releaseYear: String? = nil, poster: String? = nil, still: String? = nil, genre: [String], keyword: [String], plotText: String? = nil) {
-        self.id = id
-        self.title = Movie.cleanStr(from: title)
-        self.director = director.map { Movie.cleanStr(from: $0) }
-        self.releaseYear = releaseYear
-        self.poster = Movie.extractFirst(from: poster)?.replacingOccurrences(of: "http://", with: "https://")
-        self.still = Movie.extractFirst(from: still)?.replacingOccurrences(of: "http://", with: "https://")
-        self.genre = genre
-        self.keyword = keyword
-        self.plotText = plotText
-    }
-}
 
 @Model
 class CustomField: ObservableObject, Identifiable {
