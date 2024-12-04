@@ -216,7 +216,7 @@ struct ReviewView: View {
                         HStack {
                             Text("👥 사람")
                             Divider()
-                            TextField("영화를 같이 본 친구", text: $friends)
+                            TextField("영화를 같이 본 사람", text: $friends)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
                         
@@ -250,7 +250,7 @@ struct ReviewView: View {
                         .presentationDetents([.fraction(0.3)]) // 하단 모달 크기
                 }
 
-                                // 커스텀 필드 추가
+                   // 커스텀 필드 추가
                     VStack(alignment: .leading) {
 
                         ForEach($customFields) { $field in
@@ -280,15 +280,17 @@ struct ReviewView: View {
                             }
                         }
                         HStack{
-                            Button("레이아웃 저장") {
-                                showSaveLayoutModal = true
+                            if !customFields.isEmpty {
+                                Button("현재 레이아웃 저장") {
+                                    showSaveLayoutModal = true
+                                }
+                                .padding()
+                                .foregroundColor(.blue)
                             }
-                            .padding()
-                            .foregroundColor(.blue)
                             
                             // Delete Layout Button
                             if let selectedLayout = selectedLayout {
-                                Button("레이아웃 삭제") {
+                                Button("현재 레이아웃 삭제") {
                                     deleteLayout(selectedLayout)
                                     self.selectedLayout = nil // 선택 초기화
                                 }
@@ -375,7 +377,7 @@ struct ReviewView: View {
                 if let review = selectedReview {
                     FullReviewView(review: review)
                 } else {
-                    Text("No Review Found")
+                    Text("리뷰가 없음")
                 }
             }
             

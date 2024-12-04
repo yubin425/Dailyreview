@@ -62,11 +62,12 @@ struct ReviewCalendarView: View {
                             .bold()
                     }
                 }
+                .padding(.horizontal)
                 
                 // 날짜 그리드
                 let columns = Array(repeating: GridItem(.flexible()), count: 7)
                 LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(daysInMonth, id: \.self) { day in
+                    ForEach(Array(daysInMonth.enumerated()), id: \.offset) { index, day in
                         if let day = day {
                             VStack {
                                 Text("\(calendar.component(.day, from: day))")

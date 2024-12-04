@@ -16,16 +16,6 @@ struct SearchView: View {
             VStack {
                 // 검색 창
                 HStack{
-                    // 검색 기준
-                    Picker("검색 기준", selection: $filter){
-                        ForEach(filters, id: \.self){
-                            Text($0)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .onChange(of: filter){ _ in
-                        query = ""
-                    }
                     
                     // 검색 Query
                     TextField("\(filter) 검색", text: $query)
@@ -41,9 +31,17 @@ struct SearchView: View {
                             .foregroundColor(.blue)
                             .padding(.trailing, 20)
                     }
+                    // 검색 기준
+                    Picker("검색 기준", selection: $filter){
+                        ForEach(filters, id: \.self){
+                            Text($0)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .onChange(of: filter){ _ in
+                        query = ""
+                    }
                 }
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(40)
                 .padding(.horizontal)
                 
                 // 검색 결과
