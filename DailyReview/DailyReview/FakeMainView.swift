@@ -10,15 +10,10 @@ import SwiftUI
 struct FakeMainView: View {
     @State private var searchText = ""
     @State private var showSearchView = false
-    let posters = ["poster1", "poster2", "poster3", "poster4", "poster5"]
-    
+
     var body: some View {
-        VStack {
-            if showSearchView {
-                NavigationStack {
-                    SearchView(Flag: "main")
-                }
-            } else {
+        NavigationStack {
+            VStack {
                 ZStack {
                     VStack(spacing: 0) {
                         Color.white
@@ -53,6 +48,16 @@ struct FakeMainView: View {
                         Spacer()
                     }
                 }
+
+                // Navigation Link for the search view
+                NavigationLink(
+                    destination: SearchView(Flag: "main"),
+                    isActive: $showSearchView,
+                    label: {
+                        EmptyView()
+                    }
+                )
+                .hidden() // Hide the actual navigation link view
             }
         }
     }
