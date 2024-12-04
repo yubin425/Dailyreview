@@ -32,7 +32,7 @@ struct FakeMainView: View {
                     }
 
                     VStack {
-                        PosterCarouselView(posters: posters)
+                        PosterCarouselView(reviews: dummyMovies)
                             .frame(height: 470)
 
                         TextField("Search...", text: $searchText)

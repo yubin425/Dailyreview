@@ -8,23 +8,50 @@
 import SwiftUI
 import UIKit
 
+// Fetch poster image asynchronously
+private func fetchPosterImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
+    let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        if let data = data, let image = UIImage(data: data) {
+            completion(image)
+        } else {
+            completion(nil)
+        }
+    }
+    task.resume()
+}
+
+// Poster Carousel view which is used in SwiftUI
 struct PosterCarouselView: UIViewControllerRepresentable {
-    let posters: [String]
+    let reviews: [Review] // Using the Review model
 
     func makeUIViewController(context: Context) -> HighlightingCollectionViewController {
-        let viewController = HighlightingCollectionViewController(posters: posters)
+        var vReviews = reviews
+        if reviews.count < 5 {
+            let dummyCount = 5 - reviews.count
+            for _ in 0..<dummyCount {
+                // Use dummy values if reviews count is less than 5
+                let movie1 = Movie(id: UUID(), title: "Inception", director: ["Christopher Nolan"], releaseYear: "2010", poster: "https://marketplace.canva.com/EAFTl0ixW_k/1/0/1131w/canva-black-white-minimal-alone-movie-poster-YZ-0GJ13Nc8.jpg", genre: ["Sci-Fi", "Action"], keyword: ["dream", "mind-bending"], plotText: "A thief who steals corporate secrets through the use of dream-sharing technology is given the task of planting an idea into the mind of a CEO.", actor: ["Leonardo DiCaprio", "Joseph Gordon-Levitt"])
+                let movieStorage1 = movie1.toStorage()
+                let review1 = Review(movieStorage: movieStorage1, reviewText: "Mind-blowing and intense!", rating: 5, watchDate: Date(), watchLocation: "Cinema A", friends: "John, Sarah")
+                vReviews.append(review1)
+            }
+        }
+        
+        let viewController = HighlightingCollectionViewController(reviews: vReviews)
         return viewController
     }
 
     func updateUIViewController(_ uiViewController: HighlightingCollectionViewController, context: Context) {}
 }
 
+// Custom UICollectionView controller for horizontal scrolling
 class HighlightingCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    var collectionView: UICollectionView!
-    let posters: [String]
     
-    init(posters: [String]) {
-        self.posters = posters
+    var collectionView: UICollectionView!
+    let reviews: [Review]
+
+    init(reviews: [Review]) {
+        self.reviews = reviews
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -35,8 +62,14 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionView()
+        
+        DispatchQueue.main.async {
+            let initialIndexPath = IndexPath(item: self.reviews.count / 2, section: 0)
+            self.collectionView.scrollToItem(at: initialIndexPath, at: .centeredHorizontally, animated: false)
+            self.updateVisibleCells()
+        }
     }
-    
+
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -60,44 +93,58 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
             collectionView.heightAnchor.constraint(equalToConstant: 500)
         ])
         
-        // Scroll to the center item after the view layout is complete
         DispatchQueue.main.async {
-            let initialIndexPath = IndexPath(item: self.posters.count / 2, section: 0)
-            self.collectionView.scrollToItem(at: initialIndexPath, at: .centeredHorizontally, animated: false)
+            let initialIndexPath = IndexPath(item: self.reviews.count / 2, section: 0)
+            self.collectionView.scrollToItem(at: initialIndexPath, at: .centeredHorizontally, animated: true)
             self.updateVisibleCells()
         }
-        
     }
-    
+
     private func updateVisibleCells() {
-        guard let visibleCells = collectionView?.visibleCells else {
-            return
-        }
+        guard let visibleCells = collectionView?.visibleCells else { return }
         let centerX = collectionView.bounds.size.width / 2
+        
         for cell in visibleCells {
             guard let indexPath = collectionView.indexPath(for: cell) else {
                 continue
             }
+            
+            // Calculate the distance from the center of the collection view
             let offset = abs(collectionView.convert(cell.center, to: collectionView.superview).x - centerX)
+            
+            // Adjust scale based on the offset
             let scale = max(0.85, 1 - offset / collectionView.frame.size.width)
+            
+            // Adjust opacity based on the offset
             cell.transform = CGAffineTransform(scaleX: scale, y: scale)
             cell.alpha = 1 - (offset / collectionView.frame.size.width) * 0.5
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return posters.count
+        return reviews.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PosterCell", for: indexPath) as! PosterCell
-        if let imageView = cell.contentView.subviews.first as? UIImageView {
-            imageView.image = UIImage(named: posters[indexPath.item])
-        }
         
+        if let imageView = cell.contentView.subviews.first as? UIImageView {
+            imageView.image = UIImage(systemName: "photo")
+            
+            // Safely unwrap the optional posterURL
+            if let posterURL = reviews[indexPath.item].movieStorage.poster, !posterURL.isEmpty,
+               let url = URL(string: posterURL) {
+                fetchPosterImage(from: url) { image in
+                    DispatchQueue.main.async {
+                        imageView.image = image ?? UIImage(systemName: "photo")
+                    }
+                }
+            }
+        }
         return cell
     }
-    
+
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width * 0.7, height: collectionView.frame.height * 0.8)
     }
@@ -107,6 +154,7 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
     }
 }
 
+// Poster Cell to display movie poster in the collection view
 class PosterCell: UICollectionViewCell {
     let imageView: UIImageView
     
