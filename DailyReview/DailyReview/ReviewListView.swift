@@ -103,13 +103,15 @@ struct ReviewQueryView: View {
     @State private var sortOption: ReviewListView.SortOption = .dateAs // 초기 정렬 옵션
     
     enum ViewOption {
-        case calendar, list
+        case calendar, list, share
     }
     
     var body: some View {
         NavigationView {
             Group {
                 switch selectedView {
+                case .share:
+                    SharingView(reviews: reviews)
                 case .calendar:
                     ReviewCalendarView(reviews: reviews)
                 case .list:
@@ -146,6 +148,10 @@ struct ReviewQueryView: View {
                 // 오른쪽 상단에 뷰 전환 버튼
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 15) {
+                        Button(action: { selectedView = .share }) {
+                            Image(systemName: "photo")
+                                .foregroundColor(selectedView == .share ? .blue : .primary)
+                        }
                         Button(action: { selectedView = .calendar }) {
                             Image(systemName: "calendar")
                                 .foregroundColor(selectedView == .calendar ? .blue : .primary)
@@ -154,7 +160,9 @@ struct ReviewQueryView: View {
                             Image(systemName: "list.bullet")
                                 .foregroundColor(selectedView == .list ? .blue : .primary)
                         }
+                        
                     }
+                    
                 }
             }
         }

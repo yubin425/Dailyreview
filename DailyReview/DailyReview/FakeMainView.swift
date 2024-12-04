@@ -46,8 +46,7 @@ struct FakeMainView: View {
                             }
 
                         VStack(spacing: 10) {
-                            NotificationBlock(message: "통계\n1")
-                            NotificationBlock(message: "통계\n2")
+                            StatisticsView(reviews: dummyMovies)
                         }
                         .padding(.horizontal)
 
