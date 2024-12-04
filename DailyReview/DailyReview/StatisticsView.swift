@@ -79,10 +79,18 @@ struct StatisticsView: View {
         guard let bestRatedReview = reviews.max(by: { $0.rating < $1.rating }) else {
             return "아직 평점을 매긴 영화가 없어요"
         }
-        
+
         let movieTitle = bestRatedReview.movieStorage.title
-        return "가장 높은 평가를 준 영화는 \(movieTitle)이에요"
+        let rating = bestRatedReview.rating
+
+        // Create the star string for the rating
+        let filledStars = String(repeating: "★", count: rating)  // Full stars
+        let emptyStars = String(repeating: "☆", count: 5 - rating)  // Empty stars for 5-star scale
+
+        // Combine the title with the star ratings
+        return "가장 높은 평가를 준 영화는 \(movieTitle)이에요 \(filledStars)\(emptyStars)"
     }
+
     
     // Fetch and compute Most Watched Genre
     private func mostWatchedGenre() {
