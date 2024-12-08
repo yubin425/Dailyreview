@@ -49,7 +49,6 @@ struct PosterCarouselView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: HighlightingCollectionViewController, context: Context) {}
 }
 
-// Custom UICollectionView controller for horizontal scrolling
 class HighlightingCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     var collectionView: UICollectionView!
@@ -97,18 +96,13 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
             collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             collectionView.heightAnchor.constraint(equalToConstant: 500)
         ])
-
-        DispatchQueue.main.async {
-            let initialIndexPath = IndexPath(item: self.reviews.count / 2, section: 0)
-            self.collectionView.scrollToItem(at: initialIndexPath, at: .centeredHorizontally, animated: true)
-            self.updateVisibleCells()
-        }
     }
 
     private func updateVisibleCells() {
         guard let visibleCells = collectionView?.visibleCells else { return }
         let centerX = collectionView.bounds.size.width / 2
 
+        // Loop through all visible cells to apply scaling and alpha effects
         for cell in visibleCells {
             guard let indexPath = collectionView.indexPath(for: cell) else {
                 continue
@@ -117,11 +111,11 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
             // Calculate the distance from the center of the collection view
             let offset = abs(collectionView.convert(cell.center, to: collectionView.superview).x - centerX)
 
-            // Adjust scale based on the offset
+            // Scale the cells based on distance from the center
             let scale = max(0.85, 1 - offset / collectionView.frame.size.width)
-
-            // Adjust opacity based on the offset
             cell.transform = CGAffineTransform(scaleX: scale, y: scale)
+
+            // Adjust opacity (alpha) of cells based on their distance
             cell.alpha = 1 - (offset / collectionView.frame.size.width) * 0.5
         }
     }
@@ -136,7 +130,6 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
         if let imageView = cell.contentView.subviews.first as? UIImageView {
             imageView.image = UIImage(systemName: "photo")
 
-            // Safely unwrap the optional posterURL
             if let posterURL = reviews[indexPath.item].movieStorage.poster, !posterURL.isEmpty,
                let url = URL(string: posterURL) {
                 fetchPosterImage(from: url) { image in
@@ -153,10 +146,47 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
         return CGSize(width: collectionView.frame.width * 0.7, height: collectionView.frame.height * 0.8)
     }
 
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        scrollToNearestPoster()
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate {
+            scrollToNearestPoster()
+        }
+    }
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Continuously update the visible cells while scrolling
         updateVisibleCells()
     }
+
+    private func scrollToNearestPoster() {
+        let centerX = collectionView.bounds.size.width / 2
+        let visibleCells = collectionView.visibleCells
+
+        var closestIndexPath: IndexPath?
+        var minimumDistance: CGFloat = CGFloat.greatestFiniteMagnitude
+
+        for cell in visibleCells {
+            let cellCenterX = collectionView.convert(cell.center, to: collectionView.superview).x
+            let distance = abs(cellCenterX - centerX)
+
+            if distance < minimumDistance {
+                minimumDistance = distance
+                if let indexPath = collectionView.indexPath(for: cell) {
+                    closestIndexPath = indexPath
+                }
+            }
+        }
+
+        if let indexPath = closestIndexPath {
+            collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        }
+    }
 }
+
+
 
 // Poster Cell to display movie poster in the collection view
 class PosterCell: UICollectionViewCell {
