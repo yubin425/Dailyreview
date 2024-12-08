@@ -111,7 +111,8 @@ struct ReviewQueryView: View {
             Group {
                 switch selectedView {
                 case .share:
-                    SharingView(reviews: reviews)
+                    ReviewSelectionView(reviews: reviews)
+                    //SharingView(reviews: reviews)
                 case .calendar:
                     ReviewCalendarView(reviews: reviews)
                 case .list:
