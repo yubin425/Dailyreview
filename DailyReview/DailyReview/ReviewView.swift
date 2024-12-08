@@ -423,9 +423,16 @@ struct AsyncImageView: View {
                 case .success(let image):
                     image
                         .resizable()
-                case .failure:
-                    Image(systemName: "photo")
-                        .resizable()
+                case .failure(let error):
+                    // 실패 시 오류 메시지를 화면에 표시
+                    VStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                            .font(.title)
+                        Text("Failed to load image: \(error.localizedDescription)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 @unknown default:
                     EmptyView()
                 }
@@ -437,3 +444,10 @@ struct AsyncImageView: View {
     }
 }
 
+
+extension String {
+    var isValidURL: Bool {
+        guard let url = URL(string: self) else { return false }
+        return UIApplication.shared.canOpenURL(url)
+    }
+}

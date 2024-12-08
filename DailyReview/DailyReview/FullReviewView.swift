@@ -1,137 +1,216 @@
-
 import SwiftUI
 
-
+// Full Review View
 struct FullReviewView: View {
     @State var review: Review
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading) {
-                    // 포스터 표시
-                    GeometryReader { geometry in
-                        VStack {
-                            AsyncImageView(_URL: review.movieStorage.still)
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: geometry.size.width, height: 300)
-                                .clipped()
-                                .overlay(Color.white.opacity(0.7))
-                                .overlay(
-                                    VStack(alignment: .center) {
-                                        HStack {
-                                            AsyncImageView(_URL: review.movieStorage.poster)
-                                                .aspectRatio(contentMode: .fit)
-                                                .frame(width: 150)
-                                                .padding(.horizontal)
-                                            Spacer()
-                                            
-                                            VStack {
-                                                Text("\(review.movieStorage.title)")
-                                                    .font(.title)
-                                                    .foregroundColor(.black)
-                                                    .multilineTextAlignment(.center)
-                                                    .padding(.bottom, 5)
-                                                //Text("\(String(movie.director.first ?? "null")),\(String(movie.releaseYear ?? "null"))")
-                                                //Text("\(String(movie.plotText ?? "null"))")
-                                                    .multilineTextAlignment(.center)
-                                                
-                                                HStack {
-                                                    ForEach(1...5, id: \.self) { index in
-                                                        Image(systemName: index <= review.rating ? "star.fill" : "star")
-                                                            .resizable()
-                                                            .frame(width: 30, height: 30)
-                                                            .foregroundColor(index <= review.rating ? .orange : .black)
-                                                    }
-                                                }
-                                            }
-                                            .padding(.horizontal)
-                                        }
-                                        
-                                        HStack {
-                                            //Text("출연자:\(String(movie.director.first ?? "null"))")
-                                            //.lineLimit(1)
-                                            //.truncationMode(.tail)
-                                            
-                                            Spacer()
-                                            
-                                            //Text(Tags)
-                                            //.lineLimit(1)
-                                            //.truncationMode(.tail)
-                                        }
-                                        .padding(.horizontal)
-                                        .padding(.top, 5)
-                                    }
-                                )
+            ZStack(alignment: .top) {
+                if let stillURL = review.movieStorage.still, !stillURL.isEmpty {
+                                   AsyncImageView(_URL: stillURL)
+                                       .frame(maxWidth: .infinity, maxHeight: 300)
+                                       .clipped()
+                               } else {
+                                   // Default red gradient if no still image is available
+                                   LinearGradient(
+                                       gradient: Gradient(colors: [Color.red, Color.red.opacity(0.6)]), // Red gradient
+                                       startPoint: .top,
+                                       endPoint: .bottom
+                                   )
+                                   .frame(maxWidth: .infinity, maxHeight: 300)
+                               }
+
+                // Scrollable Content Overlay
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // Gradient Overlay
+                        ZStack(alignment: .topLeading) {
+                            // Gradient background with opacity effect
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.white.opacity(0.0), Color.white]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: 100)  // Control the height of the gradient
+                            .padding(.top, 200)  // Move gradient down
+
+                            // Title text positioned inside the gradient
+                            Text(review.movieStorage.title)
+                                .font(.title)
+                                .foregroundColor(.black)
+                                .multilineTextAlignment(.leading)
+                                .padding(.leading, 16)
+                                .padding(.top, 220)
                         }
-                    }
-                    .background(Color.white.opacity(0.3))
-                    .frame(height: 300)
-                    
-                    VStack(alignment: .leading, spacing: 20) {
-                        
-                        // 리뷰 정보 표시
-                        Text("Watched on: \(review.watchDate.formatted(date: .long, time: .omitted))")
-                            .font(.subheadline)
-                        
-                        Text("Rating: \(review.rating)/5")
-                            .font(.subheadline)
-                        
-                        Text("Location: \(review.watchLocation)")
-                            .font(.subheadline)
-                        
-                        Text("Friends: \(review.friends)")
-                            .font(.subheadline)
-                        
-                        Divider()
-                        
-                        // 커스텀 필드 표시
-                        if let customFields = review.customFields, !customFields.isEmpty {
-                            Text("Custom Fields:")
-                                .font(.headline)
-                            
-                            ForEach(customFields) { field in
-                                HStack {
-                                    Text("\(field.name):")
-                                        .bold()
-                                    Text(field.value)
-                                }
+
+
+                        // White Rounded Card
+                        VStack(spacing: 16) {
+                            // Header Content
+                            ReviewHeaderContentView(review: review)
+
+                            // Review Details
+                            ReviewDetailsView(review: review)
+
+                            // Edit Button
+                            NavigationLink(destination: EditReviewView(review: $review)) {
+                                Text("수정하기")
+                                    .font(.title2)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue.opacity(0.7))
+                                    .cornerRadius(8)
                             }
-                        } else {
-                            Text("No custom fields added.")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                            .buttonStyle(PlainButtonStyle())
                         }
-                        
-                        Divider()
-                        
-                        // 상세 리뷰 텍스트
-                        Text("Review:")
-                            .font(.headline)
-                        Text(review.reviewText)
-                            .font(.body)
+                        .background(Color.white)
+                        .cornerRadius(16)
+                        //.padding(.horizontal)
+                        .padding(.top, -50)
                     }
-                    .padding()
-                    
-                    Spacer()
-                    
-                    // 수정 버튼을 클릭하면 NavigationLink 활성화
-                    NavigationLink(destination: EditReviewView(review: $review)) {
-                        Text("수정하기")
-                            .font(.title)
-                            .foregroundColor(.blue)
-                    }
-                    .buttonStyle(PlainButtonStyle()) // 스타일을 기본 버튼 스타일로 설정
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue.opacity(0.7))
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
                 }
             }
-            .navigationTitle("Review Details")
+            .navigationTitle("Review")
+            .navigationBarTitleDisplayMode(.inline)
         }
+    }
+}
+
+struct ReviewHeaderContentView: View {
+    let review: Review
+    @State private var isExpanded = false // Toggle for plot text expansion
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // Poster and Info
+            HStack(spacing: 16) {
+                AsyncImageView(_URL: review.movieStorage.poster)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 100)
+                    .cornerRadius(8)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(review.movieStorage.title)
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.leading)
+
+                    Text("\(review.movieStorage.director.first ?? "Unknown"), \(review.movieStorage.releaseYear ?? "Unknown")")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+
+                    // Expandable Plot Text
+                    if let plot = review.movieStorage.plotText {
+                        Text(plot)
+                            .lineLimit(isExpanded ? nil : 3)
+                            .font(.body)
+                            .foregroundColor(.black)
+
+                            Button(action: { isExpanded.toggle() }) {
+                                Text(isExpanded ? "접기" : "...더보기")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                    }
+
+                    // Rating
+                    StarRatingView(rating: review.rating)
+
+                    // Tags
+                    Text(Tags)
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+            }
+        }
+        .padding()
+    }
+
+    // Movie Tags (Genre and Keywords)
+    private var Tags: String {
+        let genreTags = review.movieStorage.genre.prefix(2).map { "#\($0)" }
+        let keywordTag = review.movieStorage.keyword.prefix(1).map { "#\($0)" }
+        return (genreTags + keywordTag).joined(separator: " ")
+    }
+}
+
+struct GradientOverlay: View {
+    let isVisible: Bool
+
+    var body: some View {
+        if isVisible {
+            LinearGradient(
+                gradient: Gradient(colors: [.clear, Color.white.opacity(0.8)]),
+                startPoint: .center,
+                endPoint: .bottom
+            )
+            .frame(height: 40)
+        }
+    }
+}
+
+// Star Rating View
+struct StarRatingView: View {
+    let rating: Int
+    
+    var body: some View {
+        HStack {
+            ForEach(1...5, id: \.self) { index in
+                Image(systemName: index <= rating ? "star.fill" : "star")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(index <= rating ? .orange : .black)
+            }
+        }
+    }
+}
+
+struct ReviewDetailsView: View {
+    let review: Review
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Group {
+                Text("📅 날짜: \(review.watchDate.formatted(date: .long, time: .omitted))")
+                Text("📍 위치: \(review.watchLocation)")
+                Text("👥 친구들: \(review.friends)")
+            }
+            .font(.subheadline)
+
+            Divider()
+
+            // Custom Fields Section
+            if let customFields = review.customFields, !customFields.isEmpty {
+                Text("Custom Fields:")
+                    .font(.headline)
+
+                ForEach(customFields) { field in
+                    HStack {
+                        Text("\(field.name):")
+                            .bold()
+                        Text(field.value)
+                    }
+                }
+            } else {
+                Text("No custom fields added.")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
+
+            Divider()
+
+            // Review Text
+            Text("Review:")
+                .font(.headline)
+            Text(review.reviewText)
+                .font(.body)
+        }
+        .padding()
     }
 }
 

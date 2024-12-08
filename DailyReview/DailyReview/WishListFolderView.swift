@@ -7,19 +7,17 @@ struct WishListFolderView: View {
     @State private var searchText = ""
     
     var body: some View {
-        NavigationStack{
-            VStack{
+        NavigationStack {
+            VStack {
                 // 추가, 삭제 버튼 + 검색
                 VStack {
-                    HStack (spacing:15){
+                    HStack(spacing: 15) {
                         // 새로운 위시리스트 추가 버튼
-                        NavigationLink(destination: WishListFolderAddView())
-                        {
-                            Text("추가")
-                                .font(.system(size: 20, weight: .bold))
-                                .frame(width: 50, height: 50)
-                                .background(Color.green.opacity(0.8))
+                        NavigationLink(destination: WishListFolderAddView()) {
+                            Image(systemName: "plus")
                                 .foregroundColor(.white)
+                                .frame(width: 50, height: 50)
+                                .background(Color.red)
                                 .clipShape(Circle())
                         }
                     }
@@ -34,28 +32,27 @@ struct WishListFolderView: View {
                         .textFieldStyle(PlainTextFieldStyle())
                         .overlay(
                             HStack {
-                                Spacer()  // TextField의 오른쪽 끝에 아이콘을 위치시키기 위해 Spacer 사용
-                                Image(systemName: "magnifyingglass")  // 돋보기 아이콘
+                                Spacer()
+                                Image(systemName: "magnifyingglass")
                                     .foregroundColor(.gray)
-                                    .padding(.trailing, 20)  // 오른쪽 여백
+                                    .padding(.trailing, 20)
                             }
-                            .padding(.trailing), alignment: .trailing // 오른쪽 끝에 배치
+                            .padding(.trailing),
+                            alignment: .trailing
                         )
                         .submitLabel(.search)
                 }
                 Spacer()
 
                 // 목록
-                VStack{
-                    // 위시리스트가 없다면 안내 메시지
+                VStack {
                     if folders.isEmpty {
                         Text("위시리스트가 없습니다.")
                             .foregroundColor(.gray)
                             .padding()
                     } else {
-                        // 위시리스트 목록
                         List {
-                            ForEach(folders.filter{ searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText)}) { folder in
+                            ForEach(folders.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }) { folder in
                                 NavigationLink(destination: WishListView(wishListFolder: folder)) {
                                     HStack {
                                         AsyncImageView(_URL: folder.getPoster())
@@ -73,19 +70,19 @@ struct WishListFolderView: View {
             }
         }
     }
+
     private func deleteFolder(at offsets: IndexSet) {
         for index in offsets {
             let folderToDelete = folders[index]
-            modelContext.delete(folderToDelete) // SwiftData에서 삭제
+            modelContext.delete(folderToDelete)
         }
     }
 }
 
-
 struct WishListFolderAddView: View {
-    @Environment(\.presentationMode) var presentationMode // 네비게이션 제어용
+    @Environment(\.presentationMode) var presentationMode
     @State private var wishlistTitle: String = ""
-    @Environment(\.modelContext) private var modelContext // SwiftData 컨텍스트
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationView {
@@ -106,13 +103,12 @@ struct WishListFolderAddView: View {
                         print("Failed to save new folder: \(error)")
                     }
                     presentationMode.wrappedValue.dismiss()
-                })
-                {
+                }) {
                     Text("등록")
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding()
-                        .frame(width: 120, height:40)
+                        .frame(width: 120, height: 40)
                         .background(Color.red)
                         .cornerRadius(40)
                 }
@@ -122,7 +118,6 @@ struct WishListFolderAddView: View {
         }
     }
 }
-
 
 struct WishListView: View {
     var wishListFolder: WishListFolder
@@ -139,33 +134,30 @@ struct WishListView: View {
                 } else {
                     List {
                         ForEach(wishList.movies) { movie in
-                            NavigationLink(destination: DetailView(movie:movie.toMovie(), fromWishlist: true)){
-                                movieInstanceView(movie:movie.toMovie())
+                            NavigationLink(destination: DetailView(movie: movie.toMovie(), fromWishlist: true)) {
+                                movieInstanceView(movie: movie.toMovie())
                             }
                         }
                         .onDelete(perform: deleteMovie)
                     }
                 }
             }
-            .navigationBarTitleDisplayMode(.inline) // 타이틀을 줄여서 표시
+            .navigationBarTitleDisplayMode(.inline)
 
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Text(wishList.name) // 네비게이션 타이틀을 왼쪽에 위치
+                    Text(wishList.name)
                         .font(.headline)
                         .foregroundColor(.primary)
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack (spacing:10){
-                        // 새로운 위시리스트 추가 버튼
-                        NavigationLink(destination: SearchView(Flag: "wishlist",wishList: wishList))
-                        {
-                            Text("추가")
-                                .font(.system(size: 18, weight: .bold))
-                                .frame(width: 40, height: 40)
-                                .background(Color.green.opacity(0.8))
+                    HStack(spacing: 10) {
+                        NavigationLink(destination: SearchView(Flag: "wishlist", wishList: wishList)) {
+                            Image(systemName: "plus")
                                 .foregroundColor(.white)
+                                .frame(width: 40, height: 40)
+                                .background(Color.red)
                                 .clipShape(Circle())
                         }
                     }
@@ -174,6 +166,7 @@ struct WishListView: View {
             }
         }
     }
+
     private func deleteMovie(at offsets: IndexSet) {
         for index in offsets {
             let movie = wishListFolder.movies[index]
