@@ -210,7 +210,8 @@ struct EditScreenshotView: View {
     @State private var showColorPicker = false  // Flag to show the color picker modal
     @State private var selectedColor: Color = .red  // Default selected color
     @State private var originalScreenshot: UIImage?  // To store the original screenshot for reset
-
+    @State private var edgeSize: CGFloat = 10  // Default edge size (can be adjusted by the user)
+    
     var body: some View {
         VStack {
             if let screenshotImage = screenshotImage {
@@ -238,18 +239,22 @@ struct EditScreenshotView: View {
 
             // Display the color picker modal when the button is clicked
             .sheet(isPresented: $showColorPicker) {
-                ColorPickerView(selectedColor: $selectedColor,
-                                applyColor: applyEdgeDesign,
-                                resetEdgeDesign: resetEdgeDesign)
+                ColorPickerView(
+                    selectedColor: $selectedColor,
+                    edgeSize: $edgeSize,  // Pass edgeSize binding to ColorPickerView
+                    applyColor: applyEdgeDesign,
+                    resetEdgeDesign: resetEdgeDesign
+                )
             }
         }
         .onAppear {
-            // Save the original image when the view appears
-            originalScreenshot = screenshotImage
+            if originalScreenshot == nil, let currentScreenshot = screenshotImage {
+                originalScreenshot = currentScreenshot
+            }
         }
     }
 
-    // Function to apply the selected color as the edge design
+    // Function to apply the selected color and edge size as the edge design
     func applyEdgeDesign() {
         guard let screenshot = screenshotImage else { return }
         
@@ -264,8 +269,8 @@ struct EditScreenshotView: View {
             context.cgContext.setFillColor(selectedUIColor.cgColor)
             context.cgContext.fill(rect)
             
-            // Apply the rounded edge and clip
-            context.cgContext.addPath(UIBezierPath(roundedRect: rect.insetBy(dx: 10, dy: 10), cornerRadius: 20).cgPath)
+            // Apply the rounded edge with dynamic size
+            context.cgContext.addPath(UIBezierPath(roundedRect: rect.insetBy(dx: edgeSize, dy: edgeSize), cornerRadius: edgeSize).cgPath)
             context.cgContext.clip()
             
             // Draw the screenshot over the clipped area
@@ -304,8 +309,12 @@ struct EditScreenshotView: View {
     }
 }
 
+
+import SwiftUI
+
 struct ColorPickerView: View {
     @Binding var selectedColor: Color
+    @Binding var edgeSize: CGFloat  // Binding to edge size
     var applyColor: () -> Void  // Callback to apply the color
     var resetEdgeDesign: () -> Void  // Callback to reset the edge design to its default state
     
@@ -317,6 +326,16 @@ struct ColorPickerView: View {
 
             ColorPicker("Choose Color", selection: $selectedColor)
                 .padding()
+
+            // Slider for adjusting edge size
+            VStack {
+                Text("Edge Size: \(Int(edgeSize))")
+                    .font(.subheadline)
+                    .padding()
+
+                Slider(value: $edgeSize, in: 0...50, step: 1)
+                    .padding()
+            }
 
             Button(action: {
                 applyColor()  // Apply the selected color
