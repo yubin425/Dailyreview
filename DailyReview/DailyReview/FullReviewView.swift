@@ -4,22 +4,22 @@ import SwiftUI
 struct FullReviewView: View {
     @State var review: Review
     @Environment(\.dismiss) private var dismiss
+    @State private var isExpanded = false // 제목 더보기 토글
 
     var body: some View {
         NavigationView {
             ZStack(alignment: .top) {
                 if let stillURL = review.movieStorage.still, !stillURL.isEmpty {
-                                   AsyncImageView(_URL: stillURL)
-                                       .frame(maxWidth: .infinity, maxHeight: 300)
-                                       .clipped()
+                        AsyncImageView(_URL: stillURL)
+                            .frame(maxWidth: .infinity, maxHeight: 300)
+                            .clipped()
                                } else {
-                                   // Default red gradient if no still image is available
                                    LinearGradient(
-                                       gradient: Gradient(colors: [Color.red, Color.red.opacity(0.6)]), // Red gradient
+                                    gradient: Gradient(colors: [Color.red, Color.white]), //스틸컷 없을 경우
                                        startPoint: .top,
                                        endPoint: .bottom
                                    )
-                                   .frame(maxWidth: .infinity, maxHeight: 300)
+                                   .frame(maxWidth: .infinity, maxHeight: .infinity)
                                }
 
                 // Scrollable Content Overlay
@@ -36,25 +36,33 @@ struct FullReviewView: View {
                             .frame(height: 100)  // Control the height of the gradient
                             .padding(.top, 200)  // Move gradient down
 
-                            // Title text positioned inside the gradient
-                            Text(review.movieStorage.title)
-                                .font(.title)
-                                .foregroundColor(.black)
-                                .multilineTextAlignment(.leading)
-                                .padding(.leading, 16)
-                                .padding(.top, 220)
+                            HStack{
+                                Text(review.movieStorage.title)
+                                    .font(.title)
+                                    .fontWeight(.heavy)
+                                    .foregroundColor(.black)
+                                    .multilineTextAlignment(.leading)
+                                    .padding(.leading, 16)
+                                    .padding(.top, 220)
+                                    .lineLimit(isExpanded ? nil : 1)
+                                Button(action: { isExpanded.toggle() }) {
+                                    Text(isExpanded ? "접기" : "...더보기")
+                                        .font(.caption)
+                                        .foregroundColor(.red)
+                                }
+                            }
+                                
                         }
 
 
-                        // White Rounded Card
+                        // 내용이 적힌 둥근 네모 부분
                         VStack(spacing: 16) {
-                            // Header Content
+                            // 포스터 줄거리등 포함된 헤더 뷰
                             ReviewHeaderContentView(review: review)
-
-                            // Review Details
+                            // 유저의 리뷰 작성 항목을 포함
                             ReviewDetailsView(review: review)
 
-                            // Edit Button
+                            // 수정하기 버튼
                             NavigationLink(destination: EditReviewView(review: $review)) {
                                 Text("수정하기")
                                     .font(.title2)
@@ -81,7 +89,7 @@ struct FullReviewView: View {
 
 struct ReviewHeaderContentView: View {
     let review: Review
-    @State private var isExpanded = false // Toggle for plot text expansion
+    @State private var isExpanded = false // 줄거리 더보기 토글
 
     var body: some View {
         VStack(spacing: 16) {
@@ -103,7 +111,7 @@ struct ReviewHeaderContentView: View {
                         .foregroundColor(.gray)
 
                     // Expandable Plot Text
-                    if let plot = review.movieStorage.plotText {
+                    if let plot = review.movieStorage.plotText, plot != "" {
                         Text(plot)
                             .lineLimit(isExpanded ? nil : 3)
                             .font(.body)
