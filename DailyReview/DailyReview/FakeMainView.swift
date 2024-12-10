@@ -4,12 +4,15 @@
 //
 //  Created by 2022049898 on 11/6/24.
 //
-
+import SwiftData
 import SwiftUI
 
 struct FakeMainView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var reviews: [Review]
     @State private var searchText = ""
     @State private var showSearchView = false
+    
 
     var body: some View {
         NavigationStack {
@@ -27,7 +30,7 @@ struct FakeMainView: View {
                     }
 
                     VStack {
-                        PosterCarouselView(reviews: dummyMovies)
+                        PosterCarouselView(reviews: reviews)
                             .frame(height: 470)
 
                         TextField("Search...", text: $searchText)
@@ -40,8 +43,8 @@ struct FakeMainView: View {
                                 showSearchView = true
                             }
 
-                        VStack(spacing: 10) {
-                            StatisticsView(reviews: dummyMovies)
+                        VStack {
+                            StatisticsView(reviews: reviews)
                         }
                         .padding(.horizontal)
 

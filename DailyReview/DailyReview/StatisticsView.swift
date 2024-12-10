@@ -57,6 +57,10 @@ struct StatisticsView: View {
         // Most Watched Genre
         stats.append("가장 많이 본 영화 장르는 Unknown입니다")  // Placeholder
         
+        // Most Recent Review
+        let recentReview = mostRecentReview(reviews: reviews)
+        stats.append(recentReview)
+        
         return stats
     }
     
@@ -118,6 +122,26 @@ struct StatisticsView: View {
         
         // Stop loading
         isLoading = false
+    }
+    
+    // Most Recent Review
+    private func mostRecentReview(reviews: [Review]) -> String {
+        guard let recentReview = reviews.max(by: { $0.watchDate < $1.watchDate }) else {
+            return "아직 작성된 리뷰가 없어요"
+        }
+        
+        let movieTitle = recentReview.movieStorage.title
+        let writtenDate = formatDate(recentReview.watchDate)
+        
+        return "가장 최근에 작성된 리뷰는 \(movieTitle)이고, 작성일자는 \(writtenDate)입니다."
+    }
+    
+    // Helper function to format the date
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
     }
 }
 

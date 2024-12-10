@@ -78,6 +78,7 @@ struct NotificationBlock: View {
                 .padding()
             Spacer()
         }
+        .lineLimit(2)
         .background(Color(.systemGray5))
         .cornerRadius(10)
         .padding(.vertical, 5)

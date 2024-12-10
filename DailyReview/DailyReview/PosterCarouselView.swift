@@ -20,18 +20,30 @@ private func fetchPosterImage(from url: URL, completion: @escaping (UIImage?) ->
     task.resume()
 }
 
+class Coordinator: NSObject {
+    var navigationController: UINavigationController?
+    
+    init(navigationController: UINavigationController) {
+        self.navigationController = navigationController
+    }
+}
+
+
 // Poster Carousel view which is used in SwiftUI
 struct PosterCarouselView: UIViewControllerRepresentable {
-    let reviews: [Review] // Using the Review model
-
-    func makeUIViewController(context: Context) -> HighlightingCollectionViewController {
-        // Filter out reviews without posters
+    let reviews: [Review]
+    
+    func makeCoordinator() -> Coordinator {
+        // You will pass the navigationController here
+        return Coordinator(navigationController: UINavigationController())
+    }
+    
+    func makeUIViewController(context: Context) -> UINavigationController {
         var filteredReviews = reviews.filter { review in
             guard let posterURL = review.movieStorage.poster else { return false }
             return !posterURL.isEmpty
         }
 
-        // If there are fewer than 5 reviews, add dummy reviews
         if filteredReviews.count < 5 {
             let dummyCount = 5 - filteredReviews.count
             for _ in 0..<dummyCount {
@@ -41,23 +53,35 @@ struct PosterCarouselView: UIViewControllerRepresentable {
                 filteredReviews.append(review1)
             }
         }
-
-        let viewController = HighlightingCollectionViewController(reviews: filteredReviews)
-        return viewController
+        
+        // Create the view controller with the passed navigation controller
+        let viewController = HighlightingCollectionViewController(reviews: filteredReviews, navController: context.coordinator.navigationController!)
+        let navigationController = UINavigationController(rootViewController: viewController)
+        
+        return navigationController
     }
-
-    func updateUIViewController(_ uiViewController: HighlightingCollectionViewController, context: Context) {}
+    
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 }
+
+
+
+import UIKit
+import SwiftUI
 
 class HighlightingCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     var collectionView: UICollectionView!
     let reviews: [Review]
+    
+    // The navigationController will now be passed as a property
+    var navController: UINavigationController?
 
-    init(reviews: [Review]) {
-        self.reviews = reviews
-        super.init(nibName: nil, bundle: nil)
-    }
+    init(reviews: [Review], navController: UINavigationController) {
+            self.reviews = reviews
+            self.navController = navController // Ensure navController is passed in
+            super.init(nibName: nil, bundle: nil)
+        }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -66,7 +90,7 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCollectionView()
-
+        NotificationCenter.default.addObserver(self, selector: #selector(handleTapNotification(_:)), name: .didTapPosterCell, object: nil)
         DispatchQueue.main.async {
             let initialIndexPath = IndexPath(item: self.reviews.count / 2, section: 0)
             self.collectionView.scrollToItem(at: initialIndexPath, at: .centeredHorizontally, animated: false)
@@ -98,6 +122,17 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
         ])
     }
 
+    @objc private func handleTapNotification(_ notification: Notification) {
+        print("Received tap notification!") // Confirm if the notification is received
+        guard let review = notification.object as? Review else { return }
+        
+        let fullReviewView = FullReviewView(review: review)
+        let hostingController = UIHostingController(rootView: fullReviewView)
+        
+        navController?.pushViewController(hostingController, animated: true)
+    }
+
+    
     private func updateVisibleCells() {
         guard let visibleCells = collectionView?.visibleCells else { return }
         let centerX = collectionView.bounds.size.width / 2
@@ -186,19 +221,23 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
     }
 }
 
+extension Notification.Name {
+    static let didTapPosterCell = Notification.Name("didTapPosterCell")
+}
 
 
 // Poster Cell to display movie poster in the collection view
 class PosterCell: UICollectionViewCell {
     let imageView: UIImageView
+    var review: Review? // Store the review associated with this cell
 
     override init(frame: CGRect) {
         imageView = UIImageView(frame: .zero)
         imageView.contentMode = .scaleAspectFill
         imageView.layer.masksToBounds = true
-
+        
         super.init(frame: frame)
-
+        
         contentView.addSubview(imageView)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -207,9 +246,21 @@ class PosterCell: UICollectionViewCell {
             imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapCell))
+        contentView.addGestureRecognizer(tapGesture)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // Handle the tap gesture
+    @objc private func didTapCell() {
+        print("Poster cell tapped!") // Check if this is triggered
+        guard let review = review else { return }
+        NotificationCenter.default.post(name: .didTapPosterCell, object: review)
+    }
+
 }
+
