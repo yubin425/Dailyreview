@@ -72,7 +72,7 @@ struct SharingView: View {
                     Button(action: {
                         isEditing.toggle()
                     }) {
-                        Text("Edit Screenshot")
+                        Text("스크린샷 꾸미기")
                             .padding()
                             .background(Color.purple)
                             .foregroundColor(.white)
@@ -82,7 +82,7 @@ struct SharingView: View {
                     Button(action: {
                         shareScreenshot()
                     }) {
-                        Text("Share Screenshot")
+                        Text("스크린샷 공유하기")
                             .padding()
                             .background(Color.orange)
                             .foregroundColor(.white)
@@ -123,7 +123,8 @@ struct PosterStackViewContainer: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
-// PosterStackView showing movies and posters
+import SwiftUI
+
 struct PosterStackView: View {
     let reviews: [Review]  // List of reviews passed into this view
     let captureAction: (UIImage) -> Void
@@ -134,13 +135,20 @@ struct PosterStackView: View {
         reviews.count // Total number of reviews
     }
 
-    var body: some View {
-        let columns = [
-            GridItem(.flexible()),
-            GridItem(.flexible())
-        ]
+    // Define the number of columns dynamically based on screen width
+    private var columns: [GridItem] {
+        let screenWidth = UIScreen.main.bounds.width
+        let minItemWidth: CGFloat = 120  // Minimum width for each poster item
+        
+        // Calculate the number of columns based on screen width and min width
+        let numberOfColumns = max(Int(screenWidth / minItemWidth), 1)  // Ensure at least 1 column
 
-        LazyVGrid(columns: columns, spacing: 15) {
+        return Array(repeating: GridItem(.flexible(), spacing: 5), count: numberOfColumns)
+    }
+
+    var body: some View {
+        // Create a grid layout with the dynamic columns
+        LazyVGrid(columns: columns, spacing: 5) {
             ForEach(reviews, id: \.id) { review in
                 // Access the poster URL from the movieStorage within the Review class
                 if let posterUrlString = review.movieStorage.poster,
@@ -168,10 +176,11 @@ struct PosterStackView: View {
                             EmptyView()
                         }
                     }
+                    .cornerRadius(8)
+                    .padding(2)
                 }
             }
         }
-
         .padding()
         .background(GeometryReader { geometry in
             Color.clear.onAppear {
@@ -205,6 +214,7 @@ struct PosterStackView: View {
     }
 }
 
+
 struct EditScreenshotView: View {
     @Binding var screenshotImage: UIImage?
     @State private var showColorPicker = false  // Flag to show the color picker modal
@@ -228,7 +238,7 @@ struct EditScreenshotView: View {
                 Button(action: {
                     showColorPicker.toggle()
                 }) {
-                    Text("Choose Edge Design")
+                    Text("테두리 디자인 정하기")
                         .padding()
                         .background(Color.purple)
                         .foregroundColor(.white)
@@ -320,16 +330,16 @@ struct ColorPickerView: View {
     
     var body: some View {
         VStack {
-            Text("Select Edge Color")
+            Text("테두리 색 정하기")
                 .font(.headline)
                 .padding()
 
-            ColorPicker("Choose Color", selection: $selectedColor)
+            ColorPicker("색 선택하기", selection: $selectedColor)
                 .padding()
 
             // Slider for adjusting edge size
             VStack {
-                Text("Edge Size: \(Int(edgeSize))")
+                Text("테두리 크기: \(Int(edgeSize))")
                     .font(.subheadline)
                     .padding()
 
@@ -340,7 +350,7 @@ struct ColorPickerView: View {
             Button(action: {
                 applyColor()  // Apply the selected color
             }) {
-                Text("Apply Edge Design")
+                Text("적용하기")
                     .padding()
                     .background(Color.blue)
                     .foregroundColor(.white)
@@ -352,7 +362,7 @@ struct ColorPickerView: View {
             Button(action: {
                 resetEdgeDesign()  // Reset the edge design to its default state
             }) {
-                Text("Reset Edge Design")
+                Text("테두리 초기화")
                     .padding()
                     .foregroundColor(.red)
                     .underline()

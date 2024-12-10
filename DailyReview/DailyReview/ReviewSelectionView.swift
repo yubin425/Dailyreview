@@ -23,7 +23,7 @@ struct ReviewSelectionView: View {
                     Button(action: {
                         toggleSelectAll()
                     }) {
-                        Text(selectAll ? "Deselect All" : "Select All")
+                        Text(selectAll ? "전체 선택 해제" : "전체 선택하기")
                             .padding()
                             .background(Color.blue)
                             .foregroundColor(.white)
@@ -52,10 +52,10 @@ struct ReviewSelectionView: View {
                             Text(review.movieStorage.title)
                                 .font(.headline)
                             
-                            Text("Rated: \(ratingStars(rating: review.rating))")
+                            Text("별점: \(ratingStars(rating: review.rating))")
                                 .font(.subheadline)
                             
-                            Text("Reviewed on: \(formattedDate(review.watchDate))")
+                            Text("리뷰한 날짜: \(formattedDate(review.watchDate))")
                                 .font(.caption)
                                 .foregroundColor(.gray)
                         }
@@ -80,7 +80,7 @@ struct ReviewSelectionView: View {
                 Button(action: {
                     confirmSelection()
                 }) {
-                    Text("Confirm Selection")
+                    Text("공유하기")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(selectedReviews.isEmpty ? Color.gray : Color.blue)
@@ -99,7 +99,7 @@ struct ReviewSelectionView: View {
                     label: { EmptyView() }
                 )
             }
-            .navigationTitle("Select Reviews")
+            .navigationTitle("공유할 리뷰 선택하기")
         }
     }
     
