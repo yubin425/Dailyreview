@@ -152,6 +152,8 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
 
             // Adjust opacity (alpha) of cells based on their distance
             cell.alpha = 1 - (offset / collectionView.frame.size.width) * 0.5
+            
+            
         }
     }
 
