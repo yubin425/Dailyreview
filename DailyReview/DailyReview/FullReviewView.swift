@@ -87,18 +87,17 @@ struct FullReviewView: View {
                 }
                 
                 HStack{
+                    Spacer()
                     NavigationLink(destination: EditReviewView(review: $review)) {
                         Image(systemName: "square.and.pencil")
                             .font(.title)
                     }
                     .buttonStyle(PlainButtonStyle())
                     
-                    Spacer()
-                    
                     Button(action: deleteReview) {
                         Image(systemName: "trash.fill")
                             .font(.title)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -117,11 +116,14 @@ struct ReviewHeaderContentView: View {
     var body: some View {
         VStack(spacing: 16) {
             // Poster and Info
+            
             HStack(spacing: 16) {
                 AsyncImageView(_URL: review.movieStorage.poster)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 100)
                     .cornerRadius(8)
+                
+                Spacer()
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(review.movieStorage.title)
@@ -133,20 +135,6 @@ struct ReviewHeaderContentView: View {
                         .font(.subheadline)
                         .foregroundColor(.gray)
 
-                    // Expandable Plot Text
-                    if let plot = review.movieStorage.plotText, plot != "" {
-                        Text(plot)
-                            .lineLimit(isExpanded ? nil : 3)
-                            .font(.body)
-                            .foregroundColor(.black)
-
-                            Button(action: { isExpanded.toggle() }) {
-                                Text(isExpanded ? "접기" : "...더보기")
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                            }
-                    }
-
                     // Rating
                     StarRatingView(rating: review.rating)
 
@@ -157,6 +145,20 @@ struct ReviewHeaderContentView: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
+            }
+            .padding(.horizontal)
+            // Expandable Plot Text
+            if let plot = review.movieStorage.plotText, plot != "" {
+                Text(plot)
+                    .lineLimit(isExpanded ? nil : 3)
+                    .font(.body)
+                    .foregroundColor(.black)
+
+                    Button(action: { isExpanded.toggle() }) {
+                        Text(isExpanded ? "접기" : "...더보기")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
             }
         }
         .padding()
