@@ -76,7 +76,6 @@ struct SearchView: View {
                         if Flag == "wishlist" {
                             Button(action: {
                                 wishList!.addMovie(theMovie.toStorage())
-                                
                             }) {
                                 movieInstanceView(movie: theMovie)
                             }
