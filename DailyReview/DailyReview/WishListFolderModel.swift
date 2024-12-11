@@ -22,6 +22,7 @@ class WishListFolder:Identifiable {
     func addMovie(_ movie: MovieStorage) {
         if !movies.contains(where: { $0.id == movie.id }) {
             movies.append(movie)
+            movie.folder = self
         }
     }
 
@@ -29,6 +30,7 @@ class WishListFolder:Identifiable {
     func removeMovie(_ movie: MovieStorage) {
         if let index = movies.firstIndex(where: { $0.id == movie.id }) {
             movies.remove(at: index)
+            movie.folder = nil
         }
     }
 

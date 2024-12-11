@@ -142,7 +142,7 @@ class MovieStorage: ObservableObject, Identifiable {
     var keyword: [String]
     var plotText: String?
     var actor: [String]
-    
+    @Relationship var folder: WishListFolder?
     
     init(id: UUID, title: String, director: [String], releaseYear: String? = nil, poster: String? = nil, still: String? = nil, genre: [String], keyword: [String], plotText: String? = nil, actor: [String]) {
         self.id = id
