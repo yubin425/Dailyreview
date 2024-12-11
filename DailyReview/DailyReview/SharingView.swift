@@ -123,8 +123,6 @@ struct PosterStackViewContainer: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
-import SwiftUI
-
 struct PosterStackView: View {
     let reviews: [Review]  // List of reviews passed into this view
     let captureAction: (UIImage) -> Void
@@ -132,7 +130,10 @@ struct PosterStackView: View {
     @State private var isCaptureReady = false // Flag to indicate capture readiness
 
     var totalImages: Int {
-        reviews.count // Total number of reviews
+        reviews.filter { review in
+            guard let posterUrlString = review.movieStorage.poster else { return false }
+            return !posterUrlString.isEmpty
+        }.count // Total number of reviews with valid posters
     }
 
     // Define the number of columns dynamically based on screen width
@@ -149,7 +150,10 @@ struct PosterStackView: View {
     var body: some View {
         // Create a grid layout with the dynamic columns
         LazyVGrid(columns: columns, spacing: 5) {
-            ForEach(reviews, id: \.id) { review in
+            ForEach(reviews.filter { review in
+                guard let posterUrlString = review.movieStorage.poster else { return false }
+                return !posterUrlString.isEmpty
+            }, id: \.id) { review in
                 // Access the poster URL from the movieStorage within the Review class
                 if let posterUrlString = review.movieStorage.poster,
                    let posterUrl = URL(string: posterUrlString) {
@@ -213,6 +217,7 @@ struct PosterStackView: View {
         captureAction(image)
     }
 }
+
 
 
 struct EditScreenshotView: View {
