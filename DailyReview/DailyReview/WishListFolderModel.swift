@@ -12,7 +12,7 @@ import SwiftData
 class WishListFolder:Identifiable, Codable {
     @Attribute(.unique) var id: UUID
     var name: String
-    var movies: [MovieStorage] = []
+    @Relationship var movies: [MovieStorage] = []
     
     init(name: String) {
         self.id = UUID()

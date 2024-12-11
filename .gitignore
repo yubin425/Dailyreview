@@ -68,3 +68,8 @@ fastlane/test_output
 **/._.DS_Store
 .DS_Store
 DailyReview/.DS_Store
+DailyReview/build/XCBuildData/c47c6f9ed145e7a86c02fe8542298db2.xcbuilddata/task-store.msgpack
+DailyReview/build/XCBuildData/c47c6f9ed145e7a86c02fe8542298db2.xcbuilddata/target-graph.txt
+DailyReview/build/XCBuildData/c47c6f9ed145e7a86c02fe8542298db2.xcbuilddata/manifest.json
+DailyReview/build/XCBuildData/c47c6f9ed145e7a86c02fe8542298db2.xcbuilddata/description.msgpack
+DailyReview/build/XCBuildData/c47c6f9ed145e7a86c02fe8542298db2.xcbuilddata/build-request.json
