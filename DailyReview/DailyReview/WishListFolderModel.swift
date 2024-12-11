@@ -34,9 +34,9 @@ class WishListFolder:Identifiable, Codable {
     func removeMovie(_ movie: MovieStorage) {
         if let index = movies.firstIndex(where: { $0.id == movie.id }) {
             movies.remove(at: index)
-            movie.folder = nil
         }
         movies.append(movie)
+        movie.folder = nil
     }
 
     // 대표 포스터 가져오기
