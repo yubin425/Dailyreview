@@ -7,55 +7,80 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
-struct MainView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+struct SearchResultsView: View {
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
+        VStack {
+            Text("This is the Search Results view")
+                .padding()
+            Spacer()
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
+        .navigationTitle("Search Results")
     }
 }
 
-#Preview {
-    MainView()
-        .modelContainer(for: Item.self, inMemory: true)
+struct MainView: View {    
+    @State private var selectedTab = 0
+    @Environment(\.modelContext) private var modelContext: ModelContext
+    @Query var wishListFolder: [WishListFolder]
+
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            FakeMainView()
+                .tabItem {
+                    VStack {
+                        Image(systemName: "magnifyingglass")
+                        Text("SEARCH")
+                    }
+                }
+                .tag(0)
+
+            ReviewQueryView()
+                .tabItem {
+                    VStack {
+                        Image(systemName: "pencil")
+                        Text("REVIEW")
+                    }
+                }
+                .tag(1)
+
+            WishListFolderView()
+                .tabItem {
+                    VStack {
+                        Image(systemName: "bookmark")
+                        Text("WISHLIST")
+                    }
+                }
+                .tag(2)
+
+            MyPageView()
+                .tabItem {
+                    VStack {
+                        Image(systemName: "line.3.horizontal")
+                        Text("MY PAGE")
+                    }
+                }
+                .tag(3)
+        }
+        .accentColor(.red)  // Highlight selected tab with red color
+        .edgesIgnoringSafeArea(.all)
+    }
+}
+
+struct NotificationBlock: View {
+    let message: String
+
+    var body: some View {
+        HStack {
+            Text(message)
+                .padding()
+            Spacer()
+        }
+        .lineLimit(2)
+        .background(Color(.systemGray5))
+        .cornerRadius(10)
+        .padding(.vertical, 5)
+    }
 }
