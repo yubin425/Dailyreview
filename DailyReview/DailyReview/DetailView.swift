@@ -75,7 +75,7 @@ struct DetailView: View {
                             folders.first!.addMovie(movie.toStorage())
                         }
                         else{
-                            let firstWLName = "wishlist"
+                            let firstWLName = "Wishlist"
                             modelContext.insert(WishListFolder(name: firstWLName))
                             folders.first!.addMovie(movie.toStorage())
                         }
