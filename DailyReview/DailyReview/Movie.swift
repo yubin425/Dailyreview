@@ -131,7 +131,7 @@ struct Plot: Codable {
 
 
 @Model
-class MovieStorage: ObservableObject, Identifiable {
+class MovieStorage: ObservableObject, Identifiable, Codable {
     var id: UUID
     var title: String
     var director: [String]
@@ -171,5 +171,39 @@ class MovieStorage: ObservableObject, Identifiable {
                 actor: self.actor
                )
         return M
+    }
+    
+    // MARK: - Encodable 구현
+    private enum CodingKeys: String, CodingKey {
+        case id, title, director, releaseYear, poster, still, genre, keyword, plotText, actor
+    }
+    
+    // Decodable 초기화 구현
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(UUID.self, forKey: .id)
+        self.title = try container.decode(String.self, forKey: .title)
+        self.director = try container.decode([String].self, forKey: .director)
+        self.releaseYear = try container.decodeIfPresent(String.self, forKey: .releaseYear)
+        self.poster = try container.decodeIfPresent(String.self, forKey: .poster)
+        self.still = try container.decodeIfPresent(String.self, forKey: .still)
+        self.genre = try container.decode([String].self, forKey: .genre)
+        self.keyword = try container.decode([String].self, forKey: .keyword)
+        self.plotText = try container.decodeIfPresent(String.self, forKey: .plotText)
+        self.actor = try container.decode([String].self, forKey: .actor)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(director, forKey: .director)
+        try container.encode(releaseYear, forKey: .releaseYear)
+        try container.encode(poster, forKey: .poster)
+        try container.encode(still, forKey: .still)
+        try container.encode(genre, forKey: .genre)
+        try container.encode(keyword, forKey: .keyword)
+        try container.encode(plotText, forKey: .plotText)
+        try container.encode(actor, forKey: .actor)
     }
 }
