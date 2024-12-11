@@ -4,21 +4,19 @@
 //
 //  Created by 2022049898 on 11/6/24.
 //
-
+import SwiftData
 import SwiftUI
 
 struct FakeMainView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var reviews: [Review]
     @State private var searchText = ""
     @State private var showSearchView = false
-    let posters = ["poster1", "poster2", "poster3", "poster4", "poster5"]
     
+
     var body: some View {
-        VStack {
-            if showSearchView {
-                NavigationStack {
-                    SearchView(Flag: "main")
-                }
-            } else {
+        NavigationStack {
+            VStack {
                 ZStack {
                     VStack(spacing: 0) {
                         Color.white
@@ -32,7 +30,7 @@ struct FakeMainView: View {
                     }
 
                     VStack {
-                        PosterCarouselView(posters: posters)
+                        PosterCarouselView(reviews: reviews)
                             .frame(height: 470)
 
                         TextField("Search...", text: $searchText)
@@ -45,15 +43,24 @@ struct FakeMainView: View {
                                 showSearchView = true
                             }
 
-                        VStack(spacing: 10) {
-                            NotificationBlock(message: "통계\n1")
-                            NotificationBlock(message: "통계\n2")
+                        VStack {
+                            StatisticsView(reviews: reviews)
                         }
                         .padding(.horizontal)
 
                         Spacer()
                     }
                 }
+
+                // Navigation Link for the search view
+                NavigationLink(
+                    destination: SearchView(Flag: "main"),
+                    isActive: $showSearchView,
+                    label: {
+                        EmptyView()
+                    }
+                )
+                .hidden() // Hide the actual navigation link view
             }
         }
     }
