@@ -111,7 +111,7 @@ struct ReviewQueryView: View {
             Group {
                 switch selectedView {
                 case .calendar:
-                    ReviewCalendarView(reviews: reviews)
+                    ReviewCalendarView()
                 case .list:
                     ReviewListView(reviews: reviews, sortOption: $sortOption) // sortOption을 전달
                 }

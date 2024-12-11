@@ -5,10 +5,25 @@ struct FullReviewView: View {
     @State var review: Review
     @Environment(\.dismiss) private var dismiss
     @State private var isExpanded = false // 제목 더보기 토글
+    @Environment(\.modelContext) private var modelContext
+    
+    private func deleteReview() {
+        if let customFields = review.customFields {
+            for field in customFields {
+                modelContext.delete(field) // 커스텀 필드 삭제
+            }
+        }
+        modelContext.delete(review) // 리뷰 삭제
+        dismiss() // 화면 닫기
+    }
+
 
     var body: some View {
         NavigationView {
             ZStack(alignment: .top) {
+                
+                
+                
                 if let stillURL = review.movieStorage.still, !stillURL.isEmpty {
                         AsyncImageView(_URL: stillURL)
                             .frame(maxWidth: .infinity, maxHeight: 300)
@@ -22,6 +37,7 @@ struct FullReviewView: View {
                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                                }
 
+                
                 // Scrollable Content Overlay
                 ScrollView {
                     VStack(spacing: 16) {
@@ -44,12 +60,13 @@ struct FullReviewView: View {
                                     .multilineTextAlignment(.leading)
                                     .padding(.leading, 16)
                                     .padding(.top, 220)
-                                    .lineLimit(isExpanded ? nil : 1)
-                                Button(action: { isExpanded.toggle() }) {
-                                    Text(isExpanded ? "접기" : "...더보기")
-                                        .font(.caption)
-                                        .foregroundColor(.red)
-                                }
+                                    .lineLimit(1)
+//                                    .lineLimit(isExpanded ? nil : 1)
+//                                Button(action: { isExpanded.toggle() }) {
+//                                    Text(isExpanded ? "접기" : "...더보기")
+//                                        .font(.caption)
+//                                        .foregroundColor(.red)
+//                                }
                             }
                                 
                         }
@@ -61,18 +78,6 @@ struct FullReviewView: View {
                             ReviewHeaderContentView(review: review)
                             // 유저의 리뷰 작성 항목을 포함
                             ReviewDetailsView(review: review)
-
-                            // 수정하기 버튼
-                            NavigationLink(destination: EditReviewView(review: $review)) {
-                                Text("수정하기")
-                                    .font(.title2)
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.blue.opacity(0.7))
-                                    .cornerRadius(8)
-                            }
-                            .buttonStyle(PlainButtonStyle())
                         }
                         .background(Color.white)
                         .cornerRadius(16)
@@ -80,6 +85,24 @@ struct FullReviewView: View {
                         .padding(.top, -50)
                     }
                 }
+                
+                HStack{
+                    NavigationLink(destination: EditReviewView(review: $review)) {
+                        Image(systemName: "square.and.pencil")
+                            .font(.title)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Spacer()
+                    
+                    Button(action: deleteReview) {
+                        Image(systemName: "trash.fill")
+                            .font(.title)
+                            .foregroundColor(.white)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                
             }
             .navigationTitle("Review")
             .navigationBarTitleDisplayMode(.inline)
