@@ -194,9 +194,75 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        // Continuously update the visible cells while scrolling
         updateVisibleCells()
+
+        let contentOffsetX = scrollView.contentOffset.x
+        let contentWidth = scrollView.contentSize.width
+        let viewWidth = scrollView.frame.size.width
+
+        // Infinite scroll handling: Wrap around when the user reaches the start or end
+        if contentOffsetX <= 0 {
+            // Reached the start, prepend an item (insert at the beginning)
+            prependItem()
+        } else if contentOffsetX >= contentWidth - viewWidth {
+            // Reached the end, append an item (insert at the end)
+            appendItem()
+        }
     }
+
+    private func prependItem() {
+        // Insert a new item at the beginning of the reviews array
+        //let dummyReview = createDummyReview()
+        //reviews.insert(createDummyReview(), at: 0)
+
+        // Reload the collection view and scroll to the appropriate item
+        collectionView.reloadData()
+        DispatchQueue.main.async {
+            // Scroll to the second item to maintain the illusion of infinite scrolling
+            let indexPath = IndexPath(item: 1, section: 0)
+            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+        }
+    }
+
+    private func appendItem() {
+        // Insert a new item at the end of the reviews array
+        let dummyReview = createDummyReview()
+        //reviews.append(dummyReview)
+
+        // Reload the collection view and scroll to the appropriate item
+        collectionView.reloadData()
+        DispatchQueue.main.async {
+            // Scroll to the second-to-last item to maintain the illusion of infinite scrolling
+            let indexPath = IndexPath(item: self.reviews.count - 2, section: 0)
+            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+        }
+    }
+
+    private func createDummyReview() -> Review {
+        let movie = Movie(
+            id: UUID(),
+            title: "Dummy Movie",
+            director: ["Director Name"],
+            releaseYear: "2024",
+            poster: "https://m.media-amazon.com/images/I/51U2mb0PY5L._SY679_.jpg",  // Example poster URL
+            genre: ["Comedy"],
+            keyword: ["fun", "entertainment"],
+            plotText: "A dummy movie created for testing purposes.",
+            actor: ["Dummy Actor"]
+        )
+
+        let movieStorage = movie.toStorage()
+        return Review(
+            movieStorage: movieStorage,
+            reviewText: "This is a placeholder review text.",
+            rating: 3,
+            watchDate: Date(),
+            watchLocation: "Unknown",
+            friends: "None"
+        )
+    }
+
+
 
     private func scrollToNearestPoster() {
         let centerX = collectionView.bounds.size.width / 2
