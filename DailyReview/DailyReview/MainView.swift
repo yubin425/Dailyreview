@@ -24,7 +24,7 @@ struct MainView: View {
     @State private var selectedTab = 0
     @Environment(\.modelContext) private var modelContext: ModelContext
     @Query var wishListFolder: [WishListFolder]
-
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         TabView(selection: $selectedTab) {

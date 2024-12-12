@@ -82,10 +82,11 @@ struct ReviewSummaryView: View {
                     .font(.headline)
                     .bold()
                 
-                Text(review.reviewText)
+                Text(review.reviewText.splitWord())
                     .lineLimit(3)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
         }

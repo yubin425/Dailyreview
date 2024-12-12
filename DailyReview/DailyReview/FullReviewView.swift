@@ -1,5 +1,12 @@
 import SwiftUI
 
+extension String {
+    func splitWord() -> String {
+        return self.split(separator: "").joined(separator: "\u{200B}")
+    }
+}
+
+
 // Full Review View
 struct FullReviewView: View {
     @State var review: Review
@@ -23,24 +30,25 @@ struct FullReviewView: View {
             ZStack(alignment: .top) {
                 
                 
-                
-                if let stillURL = review.movieStorage.still, !stillURL.isEmpty {
+                GeometryReader { geometry in
+                    if let stillURL = review.movieStorage.still, !stillURL.isEmpty {
                         AsyncImageView(_URL: stillURL)
-                            .frame(maxWidth: .infinity, maxHeight: 300)
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width, height: 300)
                             .clipped()
-                               } else {
-                                   LinearGradient(
-                                    gradient: Gradient(colors: [Color.red, Color.white]), //스틸컷 없을 경우
-                                       startPoint: .top,
-                                       endPoint: .bottom
-                                   )
-                                   .frame(maxWidth: .infinity, maxHeight: .infinity)
-                               }
-
+                    } else {
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.red, Color.white]), //스틸컷 없을 경우
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
                 
                 // Scrollable Content Overlay
                 ScrollView {
-                    VStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 16) {
                         // Gradient Overlay
                         ZStack(alignment: .topLeading) {
                             // Gradient background with opacity effect
@@ -73,7 +81,24 @@ struct FullReviewView: View {
 
 
                         // 내용이 적힌 둥근 네모 부분
-                        VStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack{
+                                Spacer()
+                                NavigationLink(destination: EditReviewView(review: $review)) {
+                                    Image(systemName: "square.and.pencil")
+                                        .font(.headline)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                Button(action: deleteReview) {
+                                    Image(systemName: "trash.fill")
+                                        .font(.headline)
+                                        .foregroundColor(.black)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                            .padding(.top)
+                            .padding(.horizontal)
                             // 포스터 줄거리등 포함된 헤더 뷰
                             ReviewHeaderContentView(review: review)
                             // 유저의 리뷰 작성 항목을 포함
@@ -86,21 +111,6 @@ struct FullReviewView: View {
                     }
                 }
                 
-                HStack{
-                    Spacer()
-                    NavigationLink(destination: EditReviewView(review: $review)) {
-                        Image(systemName: "square.and.pencil")
-                            .font(.title)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    Button(action: deleteReview) {
-                        Image(systemName: "trash.fill")
-                            .font(.title)
-                            .foregroundColor(.black)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
                 
             }
             .navigationTitle("Review")
@@ -148,18 +158,38 @@ struct ReviewHeaderContentView: View {
             }
             .padding(.horizontal)
             // Expandable Plot Text
-            if let plot = review.movieStorage.plotText, plot != "" {
-                Text(plot)
-                    .lineLimit(isExpanded ? nil : 3)
-                    .font(.body)
-                    .foregroundColor(.black)
+            if let plot = review.movieStorage.plotText, !plot.isEmpty {
+                ZStack(alignment: .bottomTrailing) {
+                    Text(plot)
+                        .lineLimit(isExpanded ? nil : 3)
+                        .font(.body)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Button(action: { isExpanded.toggle() }) {
-                        Text(isExpanded ? "접기" : "...더보기")
-                            .font(.caption)
-                            .foregroundColor(.red)
+                    if !isExpanded {
+                        LinearGradient(
+                            gradient: Gradient(colors: [.white.opacity(0), .white]),
+                            startPoint: .center,
+                            endPoint: .trailing
+                        )
+                        .frame(height: 20) // 그라데이션 높이 설정
+                        .allowsHitTesting(false) // 터치 이벤트 무시
+
+                        HStack {
+                            Spacer()
+                            Button(action: { isExpanded.toggle() }) {
+                                Text("...더보기")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                            .padding(.trailing, 8) // 버튼 여백 추가
+                        }
                     }
+                }
             }
+            
+            Spacer()
+
         }
         .padding()
     }
@@ -171,6 +201,61 @@ struct ReviewHeaderContentView: View {
         return (genreTags + keywordTag).joined(separator: " ")
     }
 }
+struct ExpandablePlotText: View {
+    let plot: String
+    @State private var isExpanded: Bool = false
+    @State private var isTruncatable: Bool = false
+
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            Text(plot)
+                .lineLimit(isExpanded ? nil : 3)
+                .font(.body)
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    Text(plot)
+                        .font(.body)
+                        .lineLimit(3)
+                        .background(GeometryReader { geometry in
+                            Color.clear.onAppear {
+                                let fullHeight = Text(plot)
+                                    .font(.body)
+                                    .lineLimit(nil)
+                                    .frame(width: geometry.size.width)
+                                    .background(GeometryReader { fullGeometry in
+                                        Color.clear.onAppear {
+                                            isTruncatable = fullGeometry.size.height > geometry.size.height
+                                        }
+                                    })
+                                _ = fullHeight // Prevents unused variable warning
+                            }
+                        })
+                )
+
+            if isTruncatable && !isExpanded {
+                LinearGradient(
+                    gradient: Gradient(colors: [.white.opacity(0), .white]),
+                    startPoint: .center,
+                    endPoint: .trailing
+                )
+                .frame(height: 20) // 그라데이션 높이 설정
+                .allowsHitTesting(false) // 터치 이벤트 무시
+
+                HStack {
+                    Spacer()
+                    Button(action: { isExpanded.toggle() }) {
+                        Text("...더보기")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                    .padding(.trailing, 8) // 버튼 여백 추가
+                }
+            }
+        }
+    }
+}
+
 
 struct GradientOverlay: View {
     let isVisible: Bool
@@ -209,39 +294,44 @@ struct ReviewDetailsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Group {
+                Divider()
                 Text("📅 날짜: \(review.watchDate.formatted(date: .long, time: .omitted))")
-                Text("📍 위치: \(review.watchLocation)")
-                Text("👥 친구들: \(review.friends)")
+                if review.watchLocation != ""{
+                    Text("📍 위치: \(review.watchLocation)")
+                }
+                if review.friends != ""{
+                    Text("👥 사람: \(review.friends)")
+                }
             }
             .font(.subheadline)
 
-            Divider()
 
             // Custom Fields Section
             if let customFields = review.customFields, !customFields.isEmpty {
-                Text("Custom Fields:")
-                    .font(.headline)
-
+                Divider()
                 ForEach(customFields) { field in
                     HStack {
                         Text("\(field.name):")
-                            .bold()
+                            .font(.subheadline)
                         Text(field.value)
+                            .font(.subheadline)
                     }
                 }
             } else {
-                Text("No custom fields added.")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+
             }
 
-            Divider()
-
-            // Review Text
-            Text("Review:")
-                .font(.headline)
-            Text(review.reviewText)
-                .font(.body)
+            if review.reviewText != ""{
+                Divider()
+                // Review Text
+                Text("Review:")
+                    .font(.headline)
+                Text(review.reviewText)
+                    .font(.body)
+            }
+            Spacer()
+            Spacer()
+            Spacer()
         }
         .padding()
     }

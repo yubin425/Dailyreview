@@ -51,7 +51,7 @@ struct ReviewCalendarView: View {
 
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(alignment: .center) {
                 // 월 변경 버튼
                 HStack {
                     Button(action: { moveMonth(by: -1) }) {
@@ -125,42 +125,60 @@ struct ReviewCalendarView: View {
                     Button(action: {
                         showFullReview = true // 전체 리뷰 보기 화면으로 전환
                     }) {
-                        HStack {
-                            // 이전 리뷰 버튼
-                            Button(action: {
-                                currentReviewIndex = max(0, currentReviewIndex - 1) // 이전 리뷰로 이동
-                            }) {
-                                Image(systemName: "chevron.left")
+                            HStack {
+                                // 이전 리뷰 버튼
+                                Button(action: {
+                                    currentReviewIndex = max(0, currentReviewIndex - 1) // 이전 리뷰로 이동
+                                }) {
+                                    Image(systemName: "chevron.left")
+                                }
+                                .disabled(currentReviewIndex == 0) // 첫 리뷰인 경우 비활성화
+                                
+                                Spacer()
+                                
+                                    AsyncImageView(_URL: review.movieStorage.poster)
+                                        .scaledToFit()
+                                        .frame(width: 60, height: 90)
+                                        .cornerRadius(5)
+                                        .padding(.trailing, 5)
+                                    
+                                    VStack(alignment: .leading, spacing: 5) {
+                                        Text(review.watchDate.formatted(date: .long, time: .omitted))
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                        
+                                        Text(review.movieStorage.title.splitWord().trimmingCharacters(in: .whitespacesAndNewlines))
+                                            .font(.headline)
+                                            .bold()
+                                            .fixedSize(horizontal: false, vertical: true)
+                                            .multilineTextAlignment(.leading)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        StarRatingView(rating: review.rating)
+                                        
+                                            
+                                            Text(review.reviewText.splitWord().trimmingCharacters(in: .whitespacesAndNewlines))
+                                                .lineLimit(3)
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                                .multilineTextAlignment(.leading)
+                                                .fixedSize(horizontal: false, vertical: true)
+                                        
+                                    }
+                                    Spacer()
+                                
+                                Spacer()
+                                
+                                // 다음 리뷰 버튼
+                                Button(action: {
+                                    currentReviewIndex = min(selectedReviews.count - 1, currentReviewIndex + 1) // 다음 리뷰로 이동
+                                }) {
+                                    Image(systemName: "chevron.right")
+                                }
+                                .disabled(currentReviewIndex == selectedReviews.count - 1) // 마지막 리뷰인 경우 비활성화
                             }
-                            .disabled(currentReviewIndex == 0) // 첫 리뷰인 경우 비활성화
-
-                            Spacer()
-
-                            // 리뷰 요약 내용
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text("\(review.movieStorage.title)")
-                                    .font(.headline)
-
-                                Text(review.reviewText)
-                                    .lineLimit(3) // 요약 정보는 3줄까지만 표시
-                                    .font(.body)
-                                    .foregroundColor(.gray)
-                            }
-                            .padding(.horizontal)
-
-                            Spacer()
-
-                            // 다음 리뷰 버튼
-                            Button(action: {
-                                currentReviewIndex = min(selectedReviews.count - 1, currentReviewIndex + 1) // 다음 리뷰로 이동
-                            }) {
-                                Image(systemName: "chevron.right")
-                            }
-                            .disabled(currentReviewIndex == selectedReviews.count - 1) // 마지막 리뷰인 경우 비활성화
-                        }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(8)
                     }
                     .padding(.horizontal)
                     .swipeActions {
