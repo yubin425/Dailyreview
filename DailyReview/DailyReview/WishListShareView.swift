@@ -3,7 +3,7 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
-func createJsonFile(wishlist: WishListFolder){
+func createJsonFile(wishlist: CodableWL){
     // 로컬 파일 경로 생성
     let fileManager = FileManager.default
     let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -34,7 +34,7 @@ func loadJsonFile() -> WishListFolder? {
         
         // JSON 데이터를 WishListFolder 객체로 디코딩
         let decoder = JSONDecoder()
-        let wishlist = try decoder.decode(WishListFolder.self, from: jsonData)
+        let wishlist = try decoder.decode(CodableWL.self, from: jsonData)
         
         print("파일이 성공적으로 불러와졌습니다.")
         return wishlist.copy()
@@ -46,6 +46,7 @@ func loadJsonFile() -> WishListFolder? {
 
 // `UIDocumentPickerViewController`를 SwiftUI에 통합
 struct DocumentPickerView: UIViewControllerRepresentable {
+    var wl: CodableWL
     @Binding var wishlist: WishListFolder
     @Binding var isLoaded: String
     @Environment(\.modelContext) private var modelContext
@@ -86,7 +87,7 @@ struct DocumentPickerView: UIViewControllerRepresentable {
                 do {
                     let encoder = JSONEncoder()
                     encoder.outputFormatting = .prettyPrinted
-                    let jsonData = try encoder.encode(parent.wishlist)
+                    let jsonData = try encoder.encode(parent.wl)
                     try jsonData.write(to: selectedURL)
                     print("파일이 성공적으로 저장되었습니다: \(selectedURL)")
                 } catch {
@@ -96,8 +97,8 @@ struct DocumentPickerView: UIViewControllerRepresentable {
                 do {
                     let jsonData = try Data(contentsOf: selectedURL)
                     let decoder = JSONDecoder()
-                    let wl = try decoder.decode(WishListFolder.self, from: jsonData)
-                    parent.wishlist = wl.copy()
+                    let wishlist = try decoder.decode(CodableWL.self, from: jsonData)
+                    parent.wishlist = wishlist.copy()
                     print("파일이 성공적으로 불러와졌습니다: \(selectedURL)")
                     parent.isLoaded = "불러오기 완료"
                 } catch {

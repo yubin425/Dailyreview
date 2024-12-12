@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-var sim = true
+var sim = false
 
 struct WishListFolderView: View {
     @Environment(\.modelContext) private var modelContext
@@ -87,6 +87,7 @@ struct WishListFolderAddView: View {
     @State private var wishlistTitle: String = ""
     @Environment(\.modelContext) private var modelContext
     @State private var wishlist: WishListFolder = WishListFolder(name:"Empty")
+    @State private var wl: CodableWL = CodableWL(wl:WishListFolder(name: "Empty"))
     @State private var showDocumentPicker = false
     @State private var loadError: String? = nil
     @State private var isLoaded = "불러오기"
@@ -141,6 +142,7 @@ struct WishListFolderAddView: View {
                 .disabled(isLoaded == "불러오기 완료")
                 .sheet(isPresented: $showDocumentPicker) {
                     DocumentPickerView(
+                        wl: wl,
                         wishlist: $wishlist,
                         isLoaded: $isLoaded,
                         mode: .importFile,
@@ -156,6 +158,7 @@ struct WishListFolderAddView: View {
 
 struct WishListView: View {
     @State var wishList: WishListFolder
+    @State private var wl: CodableWL = CodableWL(wl:WishListFolder(name: "Empty"))
     @State private var delete = false
     @State private var newTitle: String = "" // 새로운 제목을 입력받을 변수
     @State private var showAlert = false // 알림 창을 표시하는 변수
@@ -201,14 +204,17 @@ struct WishListView: View {
                         }
                         Button("공유"){
                             if sim {
-                                createJsonFile(wishlist: wishList)
+                                wl = CodableWL(wl: wishList)
+                                createJsonFile(wishlist: wl)
                             }
                             else{
+                                wl = CodableWL(wl: wishList)
                                 showDocumentPicker = true
                             }
                         }
                         .sheet(isPresented: $showDocumentPicker) {
                             DocumentPickerView(
+                                wl: wl,
                                 wishlist: $wishList,
                                 isLoaded: $isLoaded,
                                 mode: .export,

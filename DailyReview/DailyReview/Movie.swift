@@ -131,7 +131,7 @@ struct Plot: Codable {
 
 
 @Model
-class MovieStorage: ObservableObject, Identifiable, Codable {
+class MovieStorage: ObservableObject, Identifiable {
     var id: UUID
     var title: String
     var director: [String]
@@ -142,7 +142,6 @@ class MovieStorage: ObservableObject, Identifiable, Codable {
     var keyword: [String]
     var plotText: String?
     var actor: [String]
-    @Relationship var folder: WishListFolder?
     
     init(id: UUID, title: String, director: [String], releaseYear: String? = nil, poster: String? = nil, still: String? = nil, genre: [String], keyword: [String], plotText: String? = nil, actor: [String]) {
         self.id = id
@@ -159,6 +158,63 @@ class MovieStorage: ObservableObject, Identifiable, Codable {
     
     func toMovie() -> Movie {
         let M = Movie(
+                id:     UUID(),
+                title: self.title,
+                director: self.director,
+                releaseYear: self.releaseYear,
+                poster: self.poster,
+                still: self.still,
+                genre: self.genre,
+                keyword: self.keyword,
+                plotText: self.plotText,
+                actor: self.actor
+               )
+        return M
+    }
+    func toCodable() -> CodableMV {
+        let M = CodableMV(
+                id:     UUID(),
+                title: self.title,
+                director: self.director,
+                releaseYear: self.releaseYear,
+                poster: self.poster,
+                still: self.still,
+                genre: self.genre,
+                keyword: self.keyword,
+                plotText: self.plotText,
+                actor: self.actor
+               )
+        return M
+    }
+}
+
+class CodableMV: ObservableObject, Identifiable, Codable {
+    var id: UUID
+    var title: String
+    var director: [String]
+    var releaseYear: String?
+    var poster: String?
+    var still: String?
+    var genre: [String]
+    var keyword: [String]
+    var plotText: String?
+    var actor: [String]
+    
+    init(id: UUID, title: String, director: [String], releaseYear: String? = nil, poster: String? = nil, still: String? = nil, genre: [String], keyword: [String], plotText: String? = nil, actor: [String]) {
+        self.id = id
+        self.title = Movie.cleanStr(from: title)
+        self.director = director
+        self.releaseYear = releaseYear
+        self.poster = Movie.extractFirst(from: poster)?.replacingOccurrences(of: "http://", with: "https://")
+        self.still = Movie.extractFirst(from: still)?.replacingOccurrences(of: "http://", with: "https://")
+        self.genre = genre
+        self.keyword = keyword
+        self.plotText = plotText
+        self.actor = actor
+    }
+    
+    func toStorage() -> MovieStorage {
+        let M = MovieStorage(
                 id:     UUID(),
                 title: self.title,
                 director: self.director,
@@ -207,3 +263,5 @@ class MovieStorage: ObservableObject, Identifiable, Codable {
         try container.encode(actor, forKey: .actor)
     }
 }
+
+

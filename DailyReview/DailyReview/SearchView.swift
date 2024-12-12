@@ -3,6 +3,7 @@ import SwiftUI
 struct SearchView: View {
     var Flag: String
     var wishList: WishListFolder?
+    @Environment(\.modelContext) private var modelContext
     @State private var isNavigating = false
     @StateObject private var viewModel = MovieSearchModel()
     @State private var query = ""
@@ -75,8 +76,9 @@ struct SearchView: View {
                     List(viewModel.movies) { theMovie in
                         if Flag == "wishlist" {
                             Button(action: {
+                                let ms = theMovie.toStorage()
+                                modelContext.insert(ms)
                                 wishList!.addMovie(theMovie.toStorage())
-                                
                             }) {
                                 movieInstanceView(movie: theMovie)
                             }

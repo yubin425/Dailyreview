@@ -9,10 +9,10 @@ import SwiftUI
 import SwiftData
 
 @Model
-class WishListFolder:Identifiable, Codable {
+class WishListFolder:Identifiable {
     @Attribute(.unique) var id: UUID
     var name: String
-    @Relationship var movies: [MovieStorage] = []
+    var movies: [MovieStorage] = []
     
     init(name: String) {
         self.id = UUID()
@@ -26,7 +26,6 @@ class WishListFolder:Identifiable, Codable {
     func addMovie(_ movie: MovieStorage) {
         if !movies.contains(where: { $0.id == movie.id }) {
             movies.append(movie)
-            movie.folder = self
         }
     }
 
@@ -35,8 +34,6 @@ class WishListFolder:Identifiable, Codable {
         if let index = movies.firstIndex(where: { $0.id == movie.id }) {
             movies.remove(at: index)
         }
-        movies.append(movie)
-        movie.folder = nil
     }
 
     // 대표 포스터 가져오기
@@ -57,15 +54,31 @@ class WishListFolder:Identifiable, Codable {
         wl.movies = self.movies
         return wl
     }
+}
+
+
+class CodableWL:Codable {
+    var name: String
+    var movies: [CodableMV] = []
     
-    private enum CodingKeys: String, CodingKey {
-        case id, name, movies
+    init(wl : WishListFolder) {
+        self.name = wl.name
+        self.movies = wl.movies.map{ $0.toCodable() }
+    }
+
+    func copy() -> WishListFolder {
+        let wl = WishListFolder(name: self.name)
+        wl.movies = self.movies.map{ $0.toStorage() }
+        return wl
     }
     
+    private enum CodingKeys: String, CodingKey {
+        case name, movies
+    }
+
     // 예시: WishListFolder의 movies 직렬화 시 추가 작업
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
         try container.encode(name, forKey: .name)
         // movies 배열의 각 MovieStorage 객체를 처리
         try container.encode(movies, forKey: .movies) // Directly encode the array of MovieStorage objects
@@ -74,8 +87,8 @@ class WishListFolder:Identifiable, Codable {
     // Decoding 시
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(UUID.self, forKey: .id)
         self.name = try container.decode(String.self, forKey: .name)
-        self.movies = try container.decode([MovieStorage].self, forKey: .movies)
+        self.movies = try container.decode([CodableMV].self, forKey: .movies)
     }
+
 }
