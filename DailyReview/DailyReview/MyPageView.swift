@@ -13,13 +13,14 @@ struct MyPageView: View {
     var body: some View {
         VStack {
                    // Color Asset을 사용
-                   Text("다크 모드")
+                   Text("마이 페이지")
                        .font(.title)
-                       .foregroundColor(Color("Positivecolor"))
+                       .foregroundColor(Color("TextColor"))
                        .padding()
                    
                    // Toggle 버튼
                    Toggle("다크 모드", isOn: $isDarkMode)
+                       .foregroundColor(.red)
                        .padding()
                }
                .preferredColorScheme(isDarkMode ? .dark : .light) // 다크 모드 설정

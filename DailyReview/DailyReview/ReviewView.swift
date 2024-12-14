@@ -103,7 +103,7 @@ struct ReviewView: View {
                     Spacer()
 
                 }
-                .padding()
+                .padding(.vertical)
             }
             .onAppear {
                 fetchSavedLayouts()
@@ -130,7 +130,7 @@ extension ReviewView {
             VStack {
                 AsyncImageView(_URL: movie.still)
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: geometry.size.width, height: 300)
+                    .frame(width: geometry.size.width, height: 270)
                     .clipped()
                     .overlay(Color.white.opacity(0.7))
                     .overlay(movieHeaderOverlay())
@@ -152,15 +152,13 @@ extension ReviewView {
                 Spacer()
 
                 VStack {
-                    Text(movie.title)
+                    Text(movie.title.splitWord())
                         .font(.title)
                         .foregroundColor(.black)
-                        .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.leading)
                         .padding(.bottom, 5)
 
                     Text("\(movie.director.first ?? "null"), \(movie.releaseYear ?? "null")")
-                    Text(movie.plotText ?? "null")
-                        .multilineTextAlignment(.center)
 
                     HStack {
                         ForEach(1...5, id: \.self) { index in
@@ -221,6 +219,7 @@ extension ReviewView {
                     .textFieldStyle(PlainTextFieldStyle())
             }
         }
+        .padding(.horizontal)
     }
 
     @ViewBuilder
@@ -239,6 +238,8 @@ extension ReviewView {
                         Text(layout.name).tag(layout as CustomFieldLayout?)
                     }
                 }
+                .foregroundColor(.red)
+                .pickerStyle(MenuPickerStyle())
                 .onChange(of: selectedLayout) { layout in
                     if let layout = layout {
                         loadLayout(layout)
@@ -246,7 +247,6 @@ extension ReviewView {
                         resetToDefaultLayout()
                     }
                 }
-                .pickerStyle(MenuPickerStyle())
             }
 
             ForEach($customFields) { $field in
@@ -270,19 +270,21 @@ extension ReviewView {
 
             HStack {
                 TextField("새 항목 이름 입력", text: $newFieldName)
-                    .textFieldStyle(PlainTextFieldStyle())
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
                 Button("추가") {
                     addCustomField()
                 }
+                .foregroundColor(.red)
             }
+            .padding(.top)
+
 
             HStack {
                 if !customFields.isEmpty {
                     Button("현재 레이아웃 저장") {
                         showSaveLayoutModal = true
                     }
-                    .padding()
-                    .foregroundColor(.blue)
+                    .foregroundColor(.red)
                 }
 
                 if let selectedLayout = selectedLayout {
@@ -290,10 +292,11 @@ extension ReviewView {
                         deleteLayout(selectedLayout)
                         self.selectedLayout = nil
                     }
-                    .foregroundColor(.red)
+                    .foregroundColor(.gray)
                 }
             }
         }
+        .padding(.horizontal)
         .padding(.bottom)
         .sheet(isPresented: $showSaveLayoutModal) {
             SaveLayoutModal(isPresented: $showSaveLayoutModal, newLayoutName: $newLayoutName, saveAction: saveCurrentLayout)
@@ -307,9 +310,10 @@ extension ReviewView {
             Text("리뷰/메모")
                 .font(.headline)
                 .padding(.top)
+                .padding(.horizontal)
             
             TextEditor(text: $reviewText)
-                .padding(10)
+                .padding(.horizontal)
                 .frame(minHeight: 100, maxHeight: .infinity, alignment: .topLeading)
                 .onAppear {
                     UITextView.appearance().backgroundColor = .clear // 배경색 제거
@@ -320,8 +324,8 @@ extension ReviewView {
                         if reviewText.isEmpty {
                             Text("상세한 리뷰 내용을 자유롭게 입력하세요")
                                 .foregroundColor(.gray)
-                                .padding(.top, 19) // 텍스트 위치 조정
-                                .padding(.leading, 13)
+                                .padding(.top, 10) // 텍스트 위치 조정
+                                .padding(.leading, 19)
                         }
                     }
                     , alignment: .topLeading
@@ -368,10 +372,11 @@ extension ReviewView {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.red.opacity(0.7))
+            .background(Color.gray.opacity(0.7))
             .foregroundColor(.white)
             .cornerRadius(8)
         }
+        .padding(.horizontal)
     }
 
     private func resetForm() {
@@ -450,7 +455,7 @@ struct SaveLayoutModal: View {
                 isPresented = false
             }
             .padding()
-            .background(Color.blue.opacity(0.7))
+            .background(Color.red.opacity(0.7))
             .foregroundColor(.white)
             .cornerRadius(8)
             .disabled(newLayoutName.isEmpty)
