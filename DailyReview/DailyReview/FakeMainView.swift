@@ -18,16 +18,6 @@ struct FakeMainView: View {
         NavigationStack {
             VStack {
                 ZStack {
-                    VStack(spacing: 0) {
-                        Color.white
-                            .frame(height: 100)
-
-                        Color.black
-                            .frame(height: 650)
-
-                        Color.white
-                            .frame(height: 100)
-                    }
 
                     VStack {
                         PosterCarouselView(reviews: reviews)

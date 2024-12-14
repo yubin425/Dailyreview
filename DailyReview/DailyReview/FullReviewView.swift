@@ -14,6 +14,8 @@ struct FullReviewView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isExpanded = false // 제목 더보기 토글
     @Environment(\.modelContext) private var modelContext
+    @State private var showDeleteAlert = false
+    
     
     private func deleteReview() {
         if let customFields = review.customFields {
@@ -91,12 +93,24 @@ struct FullReviewView: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 
-                                Button(action: deleteReview) {
+                                Button(action: {
+                                    showDeleteAlert = true // 경고창 표시
+                                }) {
                                     Image(systemName: "trash.fill")
                                         .font(.headline)
                                         .foregroundColor(.black)
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .alert(isPresented: $showDeleteAlert) {
+                                    Alert(
+                                        title: Text("리뷰 삭제"),
+                                        message: Text("이 리뷰를 정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."),
+                                        primaryButton: .destructive(Text("삭제")) {
+                                            deleteReview() // 리뷰 삭제
+                                        },
+                                        secondaryButton: .cancel(Text("취소"))
+                                    )
+                                }
                             }
                             .padding(.top)
                             .padding(.horizontal)
@@ -313,6 +327,12 @@ struct EditReviewView: View {
     @State private var selectedLayout: CustomFieldLayout? = nil
     @State private var showSaveLayoutModal = false
     @State private var newLayoutName: String = ""
+    
+    //이미지 커스텀 관련 변수
+    @State private var showImageOptions = false
+    @State private var isSelectingPoster = false
+    @State private var isSelectingStill = false
+    @State private var selectedImage: UIImage?
     
     private var Tags: String {
         let genreTags = review.movieStorage.genre.prefix(2).map { "#\($0)" }

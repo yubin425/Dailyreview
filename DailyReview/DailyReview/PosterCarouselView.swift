@@ -107,7 +107,7 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(PosterCell.self, forCellWithReuseIdentifier: "PosterCell")
-        collectionView.backgroundColor = .black
+        collectionView.backgroundColor = UIColor(named: "BackgroundColor") // 배경 색상 변경
         collectionView.decelerationRate = .fast
         collectionView.showsHorizontalScrollIndicator = false
 
@@ -235,10 +235,20 @@ class PosterCell: UICollectionViewCell {
         imageView = UIImageView(frame: .zero)
         imageView.contentMode = .scaleAspectFill
         imageView.layer.masksToBounds = true
-        
+        imageView.layer.cornerRadius = 10 // 모서리 둥글게
+        imageView.layer.borderWidth = 0.5 // 얇은 테두리
+        imageView.layer.borderColor = UIColor.white.cgColor
+
         super.init(frame: frame)
-        
+
         contentView.addSubview(imageView)
+        contentView.layer.shadowColor = UIColor.black.cgColor // 그림자
+        contentView.layer.shadowOpacity = 0.25
+        contentView.layer.shadowOffset = CGSize(width: 0, height: 2)
+        contentView.layer.shadowRadius = 6
+        contentView.layer.cornerRadius = 12
+        contentView.backgroundColor = UIColor.clear
+
         imageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
@@ -261,6 +271,4 @@ class PosterCell: UICollectionViewCell {
         guard let review = review else { return }
         NotificationCenter.default.post(name: .didTapPosterCell, object: review)
     }
-
 }
-

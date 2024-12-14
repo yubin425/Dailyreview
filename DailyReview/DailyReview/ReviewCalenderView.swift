@@ -101,13 +101,14 @@ struct ReviewCalendarView: View {
                                         AsyncImageView(_URL: firstReview.movieStorage.poster)
                                             .scaledToFit()
                                             .frame(width: 40.5, height: 60)
-                                            .cornerRadius(5)
+                                            .cornerRadius(8)
                                     }
                                 } else {
                                     // 리뷰가 없는 날짜는 빈 공간
                                     Text("")
                                         .frame(width: 40.5, height: 60)
-                                        .background(Color.gray.opacity(0.2))
+                                        .background(Color.gray.opacity(0.1))
+                                        .cornerRadius(8)
                                 }
                             }
                             .frame(width: 60, height: 80)
@@ -178,7 +179,7 @@ struct ReviewCalendarView: View {
                             }
                             .padding()
                             .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
+                            .cornerRadius(12)
                     }
                     .padding(.horizontal)
                     .swipeActions {
