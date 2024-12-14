@@ -20,18 +20,15 @@ struct FakeMainView: View {
                 ZStack {
                     VStack(spacing: 0) {
                         Color.white
-                            .frame(height: 100)
+                            .frame(height: 200)
 
-                        Color.black
-                            .frame(height: 650)
-
-                        Color.white
-                            .frame(height: 100)
+                       
                     }
 
                     VStack {
-                        PosterCarouselView(reviews: reviews)
-                            .frame(height: 470)
+                        InfiniteScrollView(reviews: reviews)
+                        //PosterCarouselView(reviews: reviews)
+                            .frame(height: 300)
 
                         TextField("Search...", text: $searchText)
                             .disabled(true)
