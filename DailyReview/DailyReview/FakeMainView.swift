@@ -18,6 +18,7 @@ struct FakeMainView: View {
         NavigationStack {
             VStack {
                 ZStack {
+
                     VStack {
                         ZStack(alignment: .topTrailing) { // ZStack으로 뷰 겹치기, 오른쪽 상단에 정렬
                             PosterCarouselView(reviews: reviews)
@@ -27,11 +28,11 @@ struct FakeMainView: View {
                                 Image(systemName: "magnifyingglass")
                                     .frame(width: 40, height: 40)
                                     .foregroundColor(.red)
+
                                     .clipShape(Circle())
                                     .padding() // 검색 버튼의 위치 조정
                             }
                         }
-                        
                         VStack {
                             StatisticsView(reviews: reviews,amount: 2)
                         }

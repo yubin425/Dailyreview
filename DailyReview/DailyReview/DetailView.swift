@@ -34,7 +34,6 @@ struct DetailView: View {
                     )
                     
                     Spacer()
-
                 }
             }
         }
