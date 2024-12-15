@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
+
 
 struct MyPageView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
-    
+    @Query private var reviews: [Review]
     var body: some View {
         VStack {
                    // Color Asset을 사용
