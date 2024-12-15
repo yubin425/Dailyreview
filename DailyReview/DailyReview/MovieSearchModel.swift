@@ -31,6 +31,7 @@ class MovieSearchModel: ObservableObject {
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
                     print("Error fetching movies: \(error)")
+                    self.movies = []
                 }
             }, receiveValue: { [weak self] response in
                 // 응답 데이터를 기반으로 movies 배열을 업데이트

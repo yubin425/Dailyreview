@@ -143,7 +143,6 @@ class MovieStorage: ObservableObject, Identifiable {
     var plotText: String?
     var actor: [String]
     
-    
     init(id: UUID, title: String, director: [String], releaseYear: String? = nil, poster: String? = nil, still: String? = nil, genre: [String], keyword: [String], plotText: String? = nil, actor: [String]) {
         self.id = id
         self.title = Movie.cleanStr(from: title)
@@ -172,4 +171,97 @@ class MovieStorage: ObservableObject, Identifiable {
                )
         return M
     }
+    func toCodable() -> CodableMV {
+        let M = CodableMV(
+                id:     UUID(),
+                title: self.title,
+                director: self.director,
+                releaseYear: self.releaseYear,
+                poster: self.poster,
+                still: self.still,
+                genre: self.genre,
+                keyword: self.keyword,
+                plotText: self.plotText,
+                actor: self.actor
+               )
+        return M
+    }
 }
+
+class CodableMV: ObservableObject, Identifiable, Codable {
+    var id: UUID
+    var title: String
+    var director: [String]
+    var releaseYear: String?
+    var poster: String?
+    var still: String?
+    var genre: [String]
+    var keyword: [String]
+    var plotText: String?
+    var actor: [String]
+    
+    init(id: UUID, title: String, director: [String], releaseYear: String? = nil, poster: String? = nil, still: String? = nil, genre: [String], keyword: [String], plotText: String? = nil, actor: [String]) {
+        self.id = id
+        self.title = Movie.cleanStr(from: title)
+        self.director = director
+        self.releaseYear = releaseYear
+        self.poster = Movie.extractFirst(from: poster)?.replacingOccurrences(of: "http://", with: "https://")
+        self.still = Movie.extractFirst(from: still)?.replacingOccurrences(of: "http://", with: "https://")
+        self.genre = genre
+        self.keyword = keyword
+        self.plotText = plotText
+        self.actor = actor
+    }
+    
+    func toStorage() -> MovieStorage {
+        let M = MovieStorage(
+                id:     UUID(),
+                title: self.title,
+                director: self.director,
+                releaseYear: self.releaseYear,
+                poster: self.poster,
+                still: self.still,
+                genre: self.genre,
+                keyword: self.keyword,
+                plotText: self.plotText,
+                actor: self.actor
+               )
+        return M
+    }
+    
+    // MARK: - Encodable 구현
+    private enum CodingKeys: String, CodingKey {
+        case id, title, director, releaseYear, poster, still, genre, keyword, plotText, actor
+    }
+    
+    // Decodable 초기화 구현
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(UUID.self, forKey: .id)
+        self.title = try container.decode(String.self, forKey: .title)
+        self.director = try container.decode([String].self, forKey: .director)
+        self.releaseYear = try container.decodeIfPresent(String.self, forKey: .releaseYear)
+        self.poster = try container.decodeIfPresent(String.self, forKey: .poster)
+        self.still = try container.decodeIfPresent(String.self, forKey: .still)
+        self.genre = try container.decode([String].self, forKey: .genre)
+        self.keyword = try container.decode([String].self, forKey: .keyword)
+        self.plotText = try container.decodeIfPresent(String.self, forKey: .plotText)
+        self.actor = try container.decode([String].self, forKey: .actor)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(director, forKey: .director)
+        try container.encode(releaseYear, forKey: .releaseYear)
+        try container.encode(poster, forKey: .poster)
+        try container.encode(still, forKey: .still)
+        try container.encode(genre, forKey: .genre)
+        try container.encode(keyword, forKey: .keyword)
+        try container.encode(plotText, forKey: .plotText)
+        try container.encode(actor, forKey: .actor)
+    }
+}
+
+

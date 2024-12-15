@@ -23,13 +23,6 @@ struct DetailView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding(.bottom, 5)
-//                // 포스터 이미지
-//                AsyncImageView(_URL: movie.poster)
-//                    .scaledToFit()
-//                    .frame(maxWidth: .infinity)
-//                    .frame(height: 300)
-//                    .cornerRadius(10)
-//                    .padding(.bottom, 10)
                 AsyncImageView(_URL: movie.still)
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
@@ -72,12 +65,17 @@ struct DetailView: View {
                             selectWishlist = true
                         }
                         else if folders.count == 1{
-                            folders.first!.addMovie(movie.toStorage())
+                            let ms = movie.toStorage()
+                            modelContext.insert(ms)
+                            folders.first!.addMovie(ms)
                         }
                         else{
-                            let firstWLName = "wishlist"
-                            modelContext.insert(WishListFolder(name: firstWLName))
-                            folders.first!.addMovie(movie.toStorage())
+                            let firstWLName = "Wishlist"
+                            let firstWishList = WishListFolder(name:firstWLName)
+                            let ms = movie.toStorage()
+                            modelContext.insert(ms)
+                            firstWishList.addMovie(ms)
+                            modelContext.insert(firstWishList)
                         }
                     })
                     {
@@ -89,7 +87,11 @@ struct DetailView: View {
                     }
                     .actionSheet(isPresented: $selectWishlist){
                         ActionSheet(title: Text("Select WishList"), message: nil, buttons:folders.map {folder in
-                            ActionSheet.Button.default(Text(folder.name)){folder.addMovie(movie.toStorage())}
+                            ActionSheet.Button.default(Text(folder.name)){
+                                let ms = movie.toStorage()
+                                modelContext.insert(ms)
+                                folder.addMovie(ms)
+                            }
                         })
                     }
                 }
