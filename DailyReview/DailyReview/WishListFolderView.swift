@@ -64,6 +64,8 @@ struct WishListFolderView: View {
                             }
                             .onDelete(perform: deleteFolder)
                         }
+                        .scrollContentBackground(.hidden) // 기본 배경 숨기고
+                        .background(Color.gray.opacity(0.1)) // 원하는 배경색 적용
                     }
                 }
                 Spacer()
@@ -140,6 +142,8 @@ struct WishListView: View {
                         }
                         .onDelete(perform: deleteMovie)
                     }
+                    .scrollContentBackground(.hidden) // 기본 배경 숨기고
+                    .background(Color.gray.opacity(0.1)) // 원하는 배경색 적용
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

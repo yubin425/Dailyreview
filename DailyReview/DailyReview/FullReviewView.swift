@@ -16,6 +16,8 @@ struct FullReviewView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showDeleteAlert = false
     
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    
     
     private func deleteReview() {
         if let customFields = review.customFields {
@@ -41,7 +43,7 @@ struct FullReviewView: View {
                             .clipped()
                     } else {
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.red, Color.white]), //스틸컷 없을 경우
+                            gradient: Gradient(colors: [Color.red,Color("BackgroundColor")]), //스틸컷 없을 경우
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -56,7 +58,7 @@ struct FullReviewView: View {
                         ZStack(alignment: .topLeading) {
                             // Gradient background with opacity effect
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.white.opacity(0.0), Color.white]),
+                                gradient: Gradient(colors: [Color("BackgroundColor").opacity(0.0), Color("BackgroundColor")]),
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -67,7 +69,7 @@ struct FullReviewView: View {
                                 Text(review.movieStorage.title)
                                     .font(.title)
                                     .fontWeight(.heavy)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(Color("TextColor"))
                                     .multilineTextAlignment(.leading)
                                     .padding(.leading, 16)
                                     .padding(.top, 220)
@@ -98,7 +100,7 @@ struct FullReviewView: View {
                                 }) {
                                     Image(systemName: "trash.fill")
                                         .font(.headline)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Color("TextColor"))
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 .alert(isPresented: $showDeleteAlert) {
@@ -119,7 +121,7 @@ struct FullReviewView: View {
                             // 유저의 리뷰 작성 항목을 포함
                             ReviewDetailsView(review: review)
                         }
-                        .background(Color.white)
+                        .background(Color("BackgroundColor"))
                         .cornerRadius(16)
                         //.padding(.horizontal)
                         .padding(.top, -50)
@@ -153,7 +155,7 @@ struct ReviewHeaderContentView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(review.movieStorage.title)
                         .font(.headline)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color("TextColor"))
                         .multilineTextAlignment(.leading)
 
                     Text("\(review.movieStorage.director.first ?? "Unknown"), \(review.movieStorage.releaseYear ?? "Unknown")")
@@ -166,7 +168,7 @@ struct ReviewHeaderContentView: View {
                     // Tags
                     Text(Tags)
                         .font(.subheadline)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color("TextColor"))
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
@@ -178,13 +180,13 @@ struct ReviewHeaderContentView: View {
                         .multilineTextAlignment(.leading)
                         .lineLimit(isExpanded ? nil : 3)
                         .font(.body)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color("TextColor"))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
 
                     if !isExpanded {
                         LinearGradient(
-                            gradient: Gradient(colors: [.white.opacity(0), .white]),
+                            gradient: Gradient(colors: [Color("BackgroundColor").opacity(0), Color("BackgroundColor")]),
                             startPoint: .center,
                             endPoint: .trailing
                         )
@@ -203,8 +205,7 @@ struct ReviewHeaderContentView: View {
                     }
                 }
             }
-            
-            Spacer()
+        
 
         }
         .padding()
@@ -225,7 +226,7 @@ struct GradientOverlay: View {
     var body: some View {
         if isVisible {
             LinearGradient(
-                gradient: Gradient(colors: [.clear, Color.white.opacity(0.8)]),
+                gradient: Gradient(colors: [.clear, Color("BackgroundColor").opacity(0.8)]),
                 startPoint: .center,
                 endPoint: .bottom
             )
@@ -385,7 +386,7 @@ struct EditReviewView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geometry.size.width, height: 270)
                     .clipped()
-                    .overlay(Color.white.opacity(0.7))
+                    .overlay(Color("BackgroundColor").opacity(0.7))
                     .overlay(
                         VStack(alignment: .center) {
                             HStack {
@@ -398,7 +399,7 @@ struct EditReviewView: View {
                                 VStack {
                                     Text("\(review.movieStorage.title)")
                                         .font(.title)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Color("TextColor"))
                                         .multilineTextAlignment(.center)
                                         .padding(.bottom, 5)
                                     
@@ -431,7 +432,7 @@ struct EditReviewView: View {
                     )
             }
         }
-        .background(Color.white.opacity(0.3))
+        .background(Color("BackgroundColor").opacity(0.3))
         .padding(.vertical)
         .frame(height: 300)
     }

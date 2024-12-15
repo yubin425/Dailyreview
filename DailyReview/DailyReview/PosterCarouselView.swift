@@ -107,7 +107,6 @@ class HighlightingCollectionViewController: UIViewController, UICollectionViewDe
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(PosterCell.self, forCellWithReuseIdentifier: "PosterCell")
-        collectionView.backgroundColor = UIColor(named: "BackgroundColor") // 배경 색상 변경
         collectionView.decelerationRate = .fast
         collectionView.showsHorizontalScrollIndicator = false
 

@@ -32,23 +32,17 @@ struct ReviewListView: View {
     }
     
     var body: some View {
-        VStack {
-            // 리뷰 리스트
-            ScrollView {
-                LazyVStack(spacing: 10) {
-                    ForEach(sortedReviews) { review in
-                        Button(action: {
-                            selectedReview = review
-                            showFullReview = true
-                        }) {
-                            ReviewSummaryView(review: review)
-                                .padding(.horizontal)
-                        }
-                        .buttonStyle(PlainButtonStyle()) // 기본 스타일 제거
-                    }
-                }
+        List(sortedReviews) { review in
+            Button(action: {
+                selectedReview = review
+                showFullReview = true
+            }) {
+                ReviewSummaryView(review: review)
             }
+            .buttonStyle(PlainButtonStyle()) // 기본 스타일 제거
         }
+        .scrollContentBackground(.hidden) // 기본 배경 숨기고
+        .background(Color.gray.opacity(0.1)) // 원하는 배경색 적용
         .safeAreaInset(edge: .top) {
             Color.clear.frame(height: 1) // 툴바와의 간격 확보
         }
@@ -60,6 +54,7 @@ struct ReviewListView: View {
         }
     }
 }
+
 
 
 struct ReviewSummaryView: View {
@@ -78,9 +73,11 @@ struct ReviewSummaryView: View {
                     .font(.caption)
                     .foregroundColor(.gray)
                 
-                Text(review.movieStorage.title)
+                Text(review.movieStorage.title.splitWord().trimmingCharacters(in: .whitespacesAndNewlines))
                     .font(.headline)
                     .bold()
+                
+                StarRatingView(rating: review.rating)
                 
                 Text(review.reviewText.splitWord())
                     .lineLimit(3)
@@ -91,8 +88,6 @@ struct ReviewSummaryView: View {
             Spacer()
         }
         .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(8)
     }
 }
 
@@ -123,27 +118,15 @@ struct ReviewQueryView: View {
             .toolbar {
                 // 왼쪽 상단에 정렬 버튼 배치 (list 뷰일 때만 보여짐)
                 ToolbarItem(placement: .navigationBarLeading) {
-                    if selectedView == .list { // 리스트 뷰일 때만 보이도록 조건 추가
-                        Button(action: {
-                            // 정렬 옵션 변경
-                            switch sortOption {
-                            case .dateAs:
-                                sortOption = .dateDs
-                            case .dateDs:
-                                sortOption = .titleAs
-                            case .titleAs:
-                                sortOption = .titleDs
-                            case .titleDs:
-                                sortOption = .dateAs
+                    if selectedView == .list {
+                        Picker("Sort Option", selection: $sortOption) {
+                            ForEach(ReviewListView.SortOption.allCases, id: \.self) { option in
+                                Text(option.rawValue).tag(option)
                             }
-                        }) {
-                            Text("\(sortOption.rawValue)")
-                                .padding(6)
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                                .frame(width: 70) // 버튼 크기 문제 해결 필요
                         }
+                        .pickerStyle(MenuPickerStyle()) // 드롭다운 스타일
+                        .foregroundColor(.red)
+                        .cornerRadius(10)
                     }
                 }
                 
@@ -152,15 +135,15 @@ struct ReviewQueryView: View {
                     HStack(spacing: 15) {
                         Button(action: { selectedView = .share }) {
                             Image(systemName: "photo")
-                                .foregroundColor(selectedView == .share ? .blue : .primary)
+                                .foregroundColor(selectedView == .share ? .red : .primary)
                         }
                         Button(action: { selectedView = .calendar }) {
                             Image(systemName: "calendar")
-                                .foregroundColor(selectedView == .calendar ? .blue : .primary)
+                                .foregroundColor(selectedView == .calendar ? .red : .primary)
                         }
                         Button(action: { selectedView = .list }) {
                             Image(systemName: "list.bullet")
-                                .foregroundColor(selectedView == .list ? .blue : .primary)
+                                .foregroundColor(selectedView == .list ? .red : .primary)
                         }
                         
                     }
