@@ -14,11 +14,35 @@ struct WishListFolderView: View {
                 // 추가, 삭제 버튼 + 검색
                 VStack {
                     HStack(spacing: 15) {
+                        
+                        TextField("Search Wishlist", text: $searchText)
+                            .padding(10) // 내부 여백 설정
+                            .padding(.leading, 30)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color(UIColor.systemGray5)) // 배경 색상
+                            )
+                            .overlay(
+                                HStack {
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundColor(.gray)
+                                        .padding(.leading, 10) // 아이콘의 여백
+                                    Spacer() // 텍스트 입력 필드와 아이콘 사이의 공간
+                                }
+                            )
+                            .cornerRadius(30) // 전체 모서리 반경
+                            .padding(.horizontal) // 외부 여백
+                            .submitLabel(.search) // 키보드 제출 버튼 스타일
+                            .onSubmit {
+                                // 검색 동작 수행
+                                print("\(searchText)")
+                            }
+                        
                         // 새로운 위시리스트 추가 버튼
                         NavigationLink(destination: WishListFolderAddView()) {
                             Image(systemName: "plus")
                                 .foregroundColor(.white)
-                                .frame(width: 50, height: 50)
+                                .frame(width: 40, height: 40)
                                 .background(Color.red)
                                 .clipShape(Circle())
                         }
@@ -26,23 +50,7 @@ struct WishListFolderView: View {
                     .padding(.trailing, 20)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                         
-                    TextField("Search Wishlist", text: $searchText)
-                        .padding()
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(40)
-                        .padding(.horizontal)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .overlay(
-                            HStack {
-                                Spacer()
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 20)
-                            }
-                            .padding(.trailing),
-                            alignment: .trailing
-                        )
-                        .submitLabel(.search)
+
                 }
                 Spacer()
 
@@ -175,26 +183,33 @@ struct WishListView: View {
                     Text(wishList.name)
                         .font(.headline)
                         .foregroundColor(.primary)
+                        .padding()
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 10) {
                         NavigationLink(destination: SearchView(Flag: "wishlist", wishList: wishList)) {
-                            Image(systemName: "plus")
-                                .foregroundColor(.white)
-                                .frame(width: 40, height: 40)
-                                .background(Color.red)
-                                .clipShape(Circle())
+                            Image(systemName: "plus") // 동그란 + 버튼
+                                   .foregroundColor(.white)
+                                   .frame(width: 30, height: 30)
+                                   .background(Color.red)
+                                   .clipShape(Circle())
                         }
-                        Button("공유"){
-                            shareContent(CodableWL(wl:wishList))
+                        // 공유 버튼
+                        Button(action: {
+                            shareContent(CodableWL(wl: wishList))
+                        }) {
+                            Label("공유", systemImage: "square.and.arrow.up") // 공유 아이콘
+                                .foregroundColor(.primary)
                         }
-                        
-                        Button("이름 변경하기") {
-                            // 버튼을 눌렀을 때 알림 창을 띄운다
+
+                        // 이름 변경하기 버튼
+                        Button(action: {
                             showAlert = true
+                        }) {
+                            Label("이름 변경하기", systemImage: "pencil") // 수정 아이콘
+                                .foregroundColor(.primary)
                         }
-                        .padding()
                         .sheet(isPresented: $showAlert) {
                             VStack {
                                 Text("새로운 제목을 입력하세요")
@@ -214,17 +229,20 @@ struct WishListView: View {
                                         showAlert = false // Sheet 닫기
                                     }
                                 }
+                                .foregroundColor(.red)
                                 .padding()
 
                                 // 취소 버튼
                                 Button("취소") {
                                     showAlert = false // Sheet 닫기
                                 }
+                                .foregroundColor(.red)
                                 .padding()
                             }
                             .padding()
                         }
                     }
+                    .padding()
                     .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }

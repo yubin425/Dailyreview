@@ -22,7 +22,7 @@ struct DetailView: View {
                 MovieStillView(stillURL: movie.still, geometry: geometry)
             }
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(alignment: .center, spacing: 16) {
                     MovieTitleView(movie: movie)
                     MovieDetailsView(
                         movie: movie,
@@ -32,6 +32,7 @@ struct DetailView: View {
                         selectWishlist: $selectWishlist,
                         isExpanded: $isExpanded
                     )
+                    
                     Spacer()
 
                 }
@@ -53,7 +54,7 @@ private struct MovieStillView: View {
                 .clipped()
         } else {
             LinearGradient(
-                gradient: Gradient(colors: [Color.red,Color("BackgroundColor")]),
+                gradient: Gradient(colors: [Color.red,Color.white]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -68,7 +69,7 @@ private struct MovieTitleView: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             LinearGradient(
-                gradient: Gradient(colors: [Color("BackgroundColor").opacity(0.0), Color("BackgroundColor")]),
+                gradient: Gradient(colors: [Color.white.opacity(0.0), Color.white]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -78,7 +79,7 @@ private struct MovieTitleView: View {
             Text(movie.title)
                 .font(.title)
                 .fontWeight(.heavy)
-                .foregroundColor(Color("TextColor"))
+                .foregroundColor(Color.black)
                 .multilineTextAlignment(.leading)
                 .padding(.leading, 16)
                 .padding(.top, 220)
@@ -106,15 +107,18 @@ private struct MovieDetailsView: View {
             )
 
             MovieHeaderView(movie: movie)
-
+                .padding(.horizontal)
+            
+            
             if let plot = movie.plotText, !plot.isEmpty {
                 MoviePlotView(plot: plot, isExpanded: $isExpanded)
             }
+
             Spacer()
             Spacer()
             Spacer()
         }
-        .background(Color("BackgroundColor"))
+        .background(Color.white)
         .cornerRadius(16)
         .padding(.top, -50)
     }
@@ -130,47 +134,50 @@ private struct WishlistAndReviewButtons: View {
     @Binding var selectWishlist: Bool
 
     var body: some View {
-        HStack {
-            Spacer()
-
-            NavigationLink(destination: ReviewView(movie: movie)) {
-                Image(systemName: "doc.text")
-                    .font(.headline)
-            }
-            .buttonStyle(PlainButtonStyle())
-
-            if fromWishlist != true {
-                Button(action: {
-                    if folders.count > 1 {
-                        selectWishlist = true
-                    } else if folders.count == 1 {
-                        folders.first!.addMovie(movie.toStorage())
-                    } else {
-                        let firstWLName = "wishlist"
-                        modelContext.insert(WishListFolder(name: firstWLName))
-                        folders.first!.addMovie(movie.toStorage())
-                    }
-                }) {
-                    Image(systemName: "heart.fill")
+        
+            HStack {
+                Spacer()
+                
+                NavigationLink(destination: ReviewView(movie: movie)) {
+                    Image(systemName: "doc.text")
                         .font(.headline)
-                        .foregroundColor(Color("TextColor"))
                 }
                 .buttonStyle(PlainButtonStyle())
-                .confirmationDialog(
-                    "Select WishList",
-                    isPresented: $selectWishlist,
-                    titleVisibility: .visible
-                ) {
-                    ForEach(folders, id: \.id) { folder in
-                        Button(folder.name) {
-                            folder.addMovie(movie.toStorage())
+                
+                if fromWishlist != true {
+                    Button(action: {
+                        if folders.count > 1 {
+                            selectWishlist = true
+                        } else if folders.count == 1 {
+                            folders.first!.addMovie(movie.toStorage())
+                        } else {
+                            let firstWLName = "wishlist"
+                            modelContext.insert(WishListFolder(name: firstWLName))
+                            folders.first!.addMovie(movie.toStorage())
+                        }
+                    }) {
+                        Image(systemName: "heart.fill")
+                            .font(.headline)
+                            .foregroundColor(Color.black)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .confirmationDialog(
+                        "Select WishList",
+                        isPresented: $selectWishlist,
+                        titleVisibility: .visible
+                    ) {
+                        ForEach(folders, id: \.id) { folder in
+                            Button(folder.name) {
+                                folder.addMovie(movie.toStorage())
+                            }
                         }
                     }
                 }
             }
-        }
-        .padding(.top)
-        .padding(.horizontal)
+            .padding(.top)
+            .padding(.horizontal)
+            
+        
     }
 }
 
@@ -178,32 +185,35 @@ private struct MovieHeaderView: View {
     var movie: Movie
 
     var body: some View {
-        HStack(spacing: 16) {
-            AsyncImageView(_URL: movie.poster)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 100)
-                .cornerRadius(8)
-
-            Spacer()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text(movie.title)
-                    .font(.headline)
-                    .foregroundColor(Color("TextColor"))
-                    .multilineTextAlignment(.leading)
-
-                Text("\(movie.director.first ?? "Unknown"), \(movie.releaseYear ?? "Unknown")")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-
-                Text(tags)
-                    .font(.subheadline)
-                    .foregroundColor(Color("TextColor"))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+        VStack{
+            HStack(spacing: 16) {
+                AsyncImageView(_URL: movie.poster)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 100)
+                    .cornerRadius(8)
+                
+                Spacer()
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(movie.title)
+                        .font(.headline)
+                        .foregroundColor(Color.black)
+                        .multilineTextAlignment(.leading)
+                    
+                    Text("\(movie.director.first ?? "Unknown"), \(movie.releaseYear ?? "Unknown")")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    
+                    Text(tags)
+                        .font(.subheadline)
+                        .foregroundColor(Color.black)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
             }
+            .padding(.horizontal)
+            
         }
-        .padding(.horizontal)
         .padding(.horizontal)
     }
 
@@ -224,13 +234,13 @@ private struct MoviePlotView: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(isExpanded ? nil : 3)
                 .font(.body)
-                .foregroundColor(Color("TextColor"))
+                .foregroundColor(Color.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
 
             if !isExpanded {
                 LinearGradient(
-                    gradient: Gradient(colors: [Color("BackgroundColor").opacity(0), .white]),
+                    gradient: Gradient(colors: [Color.black.opacity(0), .white]),
                     startPoint: .center,
                     endPoint: .trailing
                 )

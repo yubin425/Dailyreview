@@ -3,7 +3,20 @@
     {
       "color" : {
         "platform" : "osx",
-        "reference" : "alternatingContentBackgroundColor"
+        "reference" : "controlColor"
+      },
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "light"
+        }
+      ],
+      "color" : {
+        "platform" : "osx",
+        "reference" : "controlColor"
       },
       "idiom" : "universal"
     },
