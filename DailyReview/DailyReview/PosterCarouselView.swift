@@ -1,9 +1,3 @@
-//
-//  PosterCarouselView.swift
-//  DailyReview
-//
-//  Created by 2022049898 on 11/6/24.
-//
 
 import SwiftUI
 import UIKit

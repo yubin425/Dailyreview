@@ -57,6 +57,7 @@ struct MyPageView: View {
                                 Text("다크 모드")
                             }
                         }
+                        .tint(.red)
 
                         // 영화 통계 보기
                         NavigationLink(destination: UserStatisticsView(reviews: reviews)) {
