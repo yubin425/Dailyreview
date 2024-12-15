@@ -7,31 +7,6 @@
 
 import SwiftUI
 
-// Dummy movie data creation
-let movie1 = Movie(id: UUID(), title: "Inception", director: ["Christopher Nolan"], releaseYear: "2010", poster: "https://m.media-amazon.com/images/I/51U2mb0PY5L._SY679_.jpg", genre: ["Sci-Fi", "Action"], keyword: ["dream", "mind-bending"], plotText: "A thief who steals corporate secrets through the use of dream-sharing technology is given the task of planting an idea into the mind of a CEO.", actor: ["Leonardo DiCaprio", "Joseph Gordon-Levitt"])
-let movieStorage1 = movie1.toStorage()
-let review1 = Review(movieStorage: movieStorage1, reviewText: "Mind-blowing and intense!", rating: 5, watchDate: Date(), watchLocation: "Cinema A", friends: "John, Sarah")
-
-let movie2 = Movie(id: UUID(), title: "The Dark Knight", director: ["Christopher Nolan"], releaseYear: "2008", poster: "https://m.media-amazon.com/images/I/71lCw-XA2xL._SY679_.jpg", genre: ["Action", "Drama"], keyword: ["joker", "batman"], plotText: "When the menace known as The Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.", actor: ["Christian Bale", "Heath Ledger"])
-let movieStorage2 = movie2.toStorage()
-let review2 = Review(movieStorage: movieStorage2, reviewText: "A masterpiece, especially Ledger's performance!", rating: 5, watchDate: Date(), watchLocation: "Cinema B", friends: "Mike, Anna")
-
-let movie3 = Movie(id: UUID(), title: "The Matrix", director: ["Lana Wachowski", "Lilly Wachowski"], releaseYear: "1999", poster: "https://m.media-amazon.com/images/I/51EG732BV4L._SY679_.jpg", genre: ["Sci-Fi", "Action"], keyword: ["reality", "simulation"], plotText: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.", actor: ["Keanu Reeves", "Laurence Fishburne"])
-let movieStorage3 = movie3.toStorage()
-let review3 = Review(movieStorage: movieStorage3, reviewText: "One of the most groundbreaking films in cinema history.", rating: 5, watchDate: Date(), watchLocation: "Cinema C", friends: "Tom, Lily")
-
-let movie4 = Movie(id: UUID(), title: "The Shawshank Redemption", director: ["Frank Darabont"], releaseYear: "1994", poster: "https://m.media-amazon.com/images/I/51NiGlapXlL._SY679_.jpg", genre: ["Drama"], keyword: ["prison", "hope"], plotText: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.", actor: ["Tim Robbins", "Morgan Freeman"])
-let movieStorage4 = movie4.toStorage()
-let review4 = Review(movieStorage: movieStorage4, reviewText: "A truly inspirational film about friendship and hope.", rating: 4, watchDate: Date(), watchLocation: "Cinema D", friends: "David")
-
-let movie5 = Movie(id: UUID(), title: "Fight Club", director: ["David Fincher"], releaseYear: "1999", poster: "https://m.media-amazon.com/images/I/51X1L0l0T+L._SY679_.jpg", genre: ["Drama", "Thriller"], keyword: ["violence", "rebellion"], plotText: "An insomniac office worker and a soap salesman form an underground fight club that evolves into something much, much more.", actor: ["Brad Pitt", "Edward Norton"])
-let movieStorage5 = movie5.toStorage()
-let review5 = Review(movieStorage: movieStorage5, reviewText: "An intense and disturbing movie with a brilliant twist.", rating: 4, watchDate: Date(), watchLocation: "Cinema E", friends: "Jack, Jane")
-
-// Now you can add them to your dummyMovies array
-let dummyMovies: [Review] = [review1, review2, review3, review4, review5]
-
-
 
 // Main sharing view
 struct SharingView: View {
@@ -53,6 +28,7 @@ struct SharingView: View {
 
     var body: some View {
         VStack {
+            
             if let screenshotImage = screenshotImage {
                 Image(uiImage: screenshotImage)
                     .resizable()
@@ -65,35 +41,39 @@ struct SharingView: View {
                     self.isLoading = false  // Mark as not loading when screenshot is captured
                 }
             }
-
-            // Only show buttons when not loading
+            
             if !isLoading {
                 HStack {
                     Button(action: {
                         isEditing.toggle()
                     }) {
-                        Text("스크린샷 꾸미기")
-                            .padding()
-                            .background(Color.purple)
+                        Image(systemName: "paintbrush")
+                            .font(.system(size: 30))
+                            .frame(width: 50, height: 50)
+                            .background(Color.red)
                             .foregroundColor(.white)
-                            .cornerRadius(8)
+                            .cornerRadius(25)
                     }
-
+                    
                     Button(action: {
                         shareScreenshot()
                     }) {
-                        Text("스크린샷 공유하기")
-                            .padding()
-                            .background(Color.orange)
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 30))
+                            .frame(width: 50, height: 50)
+                            .background(Color.red)
                             .foregroundColor(.white)
-                            .cornerRadius(8)
+                            .cornerRadius(25)
                     }
                 }
                 .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .sheet(isPresented: $isEditing) {
                     EditScreenshotView(screenshotImage: $screenshotImage)
                 }
             }
+
+            
         }
     }
 
@@ -123,8 +103,6 @@ struct PosterStackViewContainer: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
-import SwiftUI
-
 struct PosterStackView: View {
     let reviews: [Review]  // List of reviews passed into this view
     let captureAction: (UIImage) -> Void
@@ -132,7 +110,10 @@ struct PosterStackView: View {
     @State private var isCaptureReady = false // Flag to indicate capture readiness
 
     var totalImages: Int {
-        reviews.count // Total number of reviews
+        reviews.filter { review in
+            guard let posterUrlString = review.movieStorage.poster else { return false }
+            return !posterUrlString.isEmpty
+        }.count // Total number of reviews with valid posters
     }
 
     // Define the number of columns dynamically based on screen width
@@ -149,7 +130,10 @@ struct PosterStackView: View {
     var body: some View {
         // Create a grid layout with the dynamic columns
         LazyVGrid(columns: columns, spacing: 5) {
-            ForEach(reviews, id: \.id) { review in
+            ForEach(reviews.filter { review in
+                guard let posterUrlString = review.movieStorage.poster else { return false }
+                return !posterUrlString.isEmpty
+            }, id: \.id) { review in
                 // Access the poster URL from the movieStorage within the Review class
                 if let posterUrlString = review.movieStorage.poster,
                    let posterUrl = URL(string: posterUrlString) {
@@ -215,6 +199,7 @@ struct PosterStackView: View {
 }
 
 
+
 struct EditScreenshotView: View {
     @Binding var screenshotImage: UIImage?
     @State private var showColorPicker = false  // Flag to show the color picker modal
@@ -240,7 +225,7 @@ struct EditScreenshotView: View {
                 }) {
                     Text("테두리 디자인 정하기")
                         .padding()
-                        .background(Color.purple)
+                        .background(Color.red)
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
@@ -319,9 +304,6 @@ struct EditScreenshotView: View {
     }
 }
 
-
-import SwiftUI
-
 struct ColorPickerView: View {
     @Binding var selectedColor: Color
     @Binding var edgeSize: CGFloat  // Binding to edge size
@@ -352,7 +334,7 @@ struct ColorPickerView: View {
             }) {
                 Text("적용하기")
                     .padding()
-                    .background(Color.blue)
+                    .background(Color.red)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }

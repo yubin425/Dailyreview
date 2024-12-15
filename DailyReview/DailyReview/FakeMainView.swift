@@ -18,36 +18,26 @@ struct FakeMainView: View {
         NavigationStack {
             VStack {
                 ZStack {
-                    VStack(spacing: 0) {
-                        Color.white
-                            .frame(height: 100)
-
-                        Color.black
-                            .frame(height: 630)
-
-                        Color.white
-                            .frame(height: 30)
-                    }
 
                     VStack {
                         ZStack(alignment: .topTrailing) { // ZStack으로 뷰 겹치기, 오른쪽 상단에 정렬
                             PosterCarouselView(reviews: reviews)
-                                .frame(height: 470)
-
+                                .frame(height: 500)
+                            
                             NavigationLink(destination: SearchView(Flag: "main")) {
                                 Image(systemName: "magnifyingglass")
                                     .frame(width: 40, height: 40)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.red)
+
                                     .clipShape(Circle())
                                     .padding() // 검색 버튼의 위치 조정
                             }
                         }
-
                         VStack {
-                            StatisticsView(reviews: reviews)
+                            StatisticsView(reviews: reviews,amount: 2)
                         }
                         .padding(.horizontal)
-
+                        
                         Spacer()
                     }
                 }

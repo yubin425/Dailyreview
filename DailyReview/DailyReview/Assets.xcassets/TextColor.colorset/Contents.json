@@ -2,8 +2,8 @@
   "colors" : [
     {
       "color" : {
-        "platform" : "osx",
-        "reference" : "controlColor"
+        "platform" : "ios",
+        "reference" : "darkTextColor"
       },
       "idiom" : "universal"
     },
@@ -15,8 +15,8 @@
         }
       ],
       "color" : {
-        "platform" : "osx",
-        "reference" : "controlColor"
+        "platform" : "ios",
+        "reference" : "darkTextColor"
       },
       "idiom" : "universal"
     },
@@ -29,7 +29,7 @@
       ],
       "color" : {
         "platform" : "visionos",
-        "reference" : "systemGray5Color"
+        "reference" : "labelColor"
       },
       "idiom" : "universal"
     }
