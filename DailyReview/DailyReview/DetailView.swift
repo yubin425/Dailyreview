@@ -33,6 +33,7 @@ struct DetailView: View {
                         isExpanded: $isExpanded
                     )
                     Spacer()
+
                 }
             }
         }

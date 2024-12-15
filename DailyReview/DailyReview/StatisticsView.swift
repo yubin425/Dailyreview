@@ -17,9 +17,13 @@ struct StatisticsView: View {
     
     @AppStorage("isDarkMode") private var isDarkMode = false
     var allReviews: [Review]
-
-    init(reviews: [Review]) {
+    
+    // Add `amount` to accept as a parameter
+    var amount: Int
+    
+    init(reviews: [Review], amount: Int) {
         self.allReviews = reviews
+        self.amount = amount
         _statistics = State(initialValue: StatisticsView.generateStatistics(reviews: reviews))
     }
 
@@ -32,7 +36,7 @@ struct StatisticsView: View {
                 if statistics.isEmpty || hiddenStatistics.count == statistics.count {
                     StaticsBlock(message: "더 많은 리뷰를 기록해주세요!")
                 } else {
-                    ForEach(displayedStatistics, id: \ .self) { stat in
+                    ForEach(displayedStatistics, id: \.self) { stat in
                         if !hiddenStatistics.contains(stat) {
                             StaticsBlock(message: stat)
                                 .overlay(
@@ -70,8 +74,9 @@ struct StatisticsView: View {
         }
     }
 
+    // Modify displayedStatistics to use `amount`
     private var displayedStatistics: [String] {
-        statistics.filter { !hiddenStatistics.contains($0) }.prefix(2).map { $0 }
+        statistics.filter { !hiddenStatistics.contains($0) }.prefix(amount).map { $0 }
     }
 
     private func showDetails(for stat: String) {
@@ -97,6 +102,9 @@ struct StatisticsView: View {
         
         let recentReview = mostRecentReview(reviews: reviews)
         stats.append(recentReview)
+        
+        let latestMovie = latestMovieInWrittenReview(reviews: reviews)
+        stats.append(latestMovie)
         
         return stats
     }
@@ -146,7 +154,21 @@ struct StatisticsView: View {
 
         isLoading = false
     }
+    
+    private static func latestMovieInWrittenReview(reviews: [Review]) -> String {
+        guard let latestReview = reviews.sorted(by: { $0.movieStorage.releaseYear ?? "" > $1.movieStorage.releaseYear ?? "" }).first else {
+            return "아직 작성된 리뷰가 없어요"
+        }
 
+        let movieTitle = latestReview.movieStorage.title
+        // Safely unwrap releaseYear, providing a default value if it's nil
+        let releaseYear = latestReview.movieStorage.releaseYear ?? "Unknown"
+
+        return "작성된 리뷰 중 가장 최신 영화는 \(movieTitle) (\(releaseYear)) 입니다."
+    }
+
+    
+    
     private static func mostRecentReview(reviews: [Review]) -> String {
         guard let recentReview = reviews.max(by: { $0.watchDate < $1.watchDate }) else {
             return "아직 작성된 리뷰가 없어요"

@@ -18,47 +18,29 @@ struct FakeMainView: View {
         NavigationStack {
             VStack {
                 ZStack {
-
                     VStack {
-                        PosterCarouselView(reviews: reviews)
-                            .frame(height: 470)
-
-                        TextField("Search...", text: $searchText)
-                            .disabled(true)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                            .padding(.horizontal)
-                            .onTapGesture {
-                                showSearchView = true
+                        ZStack(alignment: .topTrailing) { // ZStack으로 뷰 겹치기, 오른쪽 상단에 정렬
+                            PosterCarouselView(reviews: reviews)
+                                .frame(height: 520)
+                            
+                            NavigationLink(destination: SearchView(Flag: "main")) {
+                                Image(systemName: "magnifyingglass")
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.white)
+                                    .clipShape(Circle())
+                                    .padding() // 검색 버튼의 위치 조정
                             }
-
+                        }
+                        
                         VStack {
-                            StatisticsView(reviews: reviews)
+                            StatisticsView(reviews: reviews,amount: 2)
                         }
                         .padding(.horizontal)
-
+                        
                         Spacer()
                     }
                 }
-
-                // Navigation Link for the search view
-                NavigationLink(
-                    destination: SearchView(Flag: "main"),
-                    isActive: $showSearchView,
-                    label: {
-                        EmptyView()
-                    }
-                )
-                .hidden() // Hide the actual navigation link view
             }
         }
-    }
-}
-
-struct FakeMainView_Previews: PreviewProvider {
-    static var previews: some View {
-        FakeMainView()
-            .edgesIgnoringSafeArea(.all)
     }
 }
