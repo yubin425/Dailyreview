@@ -17,21 +17,7 @@ struct ReviewSelectionView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                HStack {
-                    Spacer()
-                    
-                    Button(action: {
-                        toggleSelectAll()
-                    }) {
-                        Text(selectAll ? "전체 선택 해제" : "전체 선택하기")
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    .padding()
-                }
-                
+
                 List(reviews) { review in
                     HStack {
                         // Movie Poster
@@ -69,27 +55,40 @@ struct ReviewSelectionView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 20, height: 20)
-                                .foregroundColor(selectedReviews.contains(review.id) ? .blue : .gray)
+                                .foregroundColor(selectedReviews.contains(review.id) ? .red : .gray)
                         }
                         .buttonStyle(PlainButtonStyle()) // Use PlainButtonStyle to avoid default button styles
                     }
                     .padding()
                 }
                 
-                // Button to confirm selected reviews
-                Button(action: {
-                    confirmSelection()
-                }) {
-                    Text("공유하기")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(selectedReviews.isEmpty ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                HStack{
+                    Button(action: {
+                        toggleSelectAll()
+                    }) {
+                        Text(selectAll ? "전체 선택 해제" : "전체 선택하기")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding()
+                    
+                    // Button to confirm selected reviews
+                    Button(action: {
+                        confirmSelection()
+                    }) {
+                        Text("공유하기")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(selectedReviews.isEmpty ? Color.gray : Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .disabled(selectedReviews.isEmpty)
+                    .padding()
                 }
-                .disabled(selectedReviews.isEmpty)
-                .padding()
-                
                 // Navigation link for SharingView
                 NavigationLink(
                     destination: SharingView(reviews: selectedReviews.map { id in
@@ -99,7 +98,7 @@ struct ReviewSelectionView: View {
                     label: { EmptyView() }
                 )
             }
-            .navigationTitle("공유할 리뷰 선택하기")
+            .navigationTitle("공유할 리뷰 선택")
         }
     }
     
