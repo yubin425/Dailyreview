@@ -103,6 +103,9 @@ struct StatisticsView: View {
         let recentReview = mostRecentReview(reviews: reviews)
         stats.append(recentReview)
         
+        let latestMovie = latestMovieInWrittenReview(reviews: reviews)
+        stats.append(latestMovie)
+        
         return stats
     }
 
@@ -151,7 +154,21 @@ struct StatisticsView: View {
 
         isLoading = false
     }
+    
+    private static func latestMovieInWrittenReview(reviews: [Review]) -> String {
+        guard let latestReview = reviews.sorted(by: { $0.movieStorage.releaseYear ?? "" > $1.movieStorage.releaseYear ?? "" }).first else {
+            return "아직 작성된 리뷰가 없어요"
+        }
 
+        let movieTitle = latestReview.movieStorage.title
+        // Safely unwrap releaseYear, providing a default value if it's nil
+        let releaseYear = latestReview.movieStorage.releaseYear ?? "Unknown"
+
+        return "작성된 리뷰 중 가장 최신 영화는 \(movieTitle) (\(releaseYear)) 입니다."
+    }
+
+    
+    
     private static func mostRecentReview(reviews: [Review]) -> String {
         guard let recentReview = reviews.max(by: { $0.watchDate < $1.watchDate }) else {
             return "아직 작성된 리뷰가 없어요"
