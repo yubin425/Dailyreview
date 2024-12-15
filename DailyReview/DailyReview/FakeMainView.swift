@@ -34,7 +34,7 @@ struct FakeMainView: View {
                             }
 
                         VStack {
-                            StatisticsView(reviews: reviews)
+                            StatisticsView(reviews: reviews,amount: 2)
                         }
                         .padding(.horizontal)
 

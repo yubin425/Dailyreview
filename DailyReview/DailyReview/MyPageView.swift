@@ -24,6 +24,9 @@ struct MyPageView: View {
                    Toggle("다크 모드", isOn: $isDarkMode)
                        .foregroundColor(.red)
                        .padding()
+            VStack {
+                StatisticsView(reviews: reviews,amount: 5)
+            }
                }
                .preferredColorScheme(isDarkMode ? .dark : .light) // 다크 모드 설정
                .animation(.easeInOut, value: isDarkMode) // 애니메이션 효과

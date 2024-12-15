@@ -17,9 +17,13 @@ struct StatisticsView: View {
     
     @AppStorage("isDarkMode") private var isDarkMode = false
     var allReviews: [Review]
-
-    init(reviews: [Review]) {
+    
+    // Add `amount` to accept as a parameter
+    var amount: Int
+    
+    init(reviews: [Review], amount: Int) {
         self.allReviews = reviews
+        self.amount = amount
         _statistics = State(initialValue: StatisticsView.generateStatistics(reviews: reviews))
     }
 
@@ -32,7 +36,7 @@ struct StatisticsView: View {
                 if statistics.isEmpty || hiddenStatistics.count == statistics.count {
                     StaticsBlock(message: "더 많은 리뷰를 기록해주세요!")
                 } else {
-                    ForEach(displayedStatistics, id: \ .self) { stat in
+                    ForEach(displayedStatistics, id: \.self) { stat in
                         if !hiddenStatistics.contains(stat) {
                             StaticsBlock(message: stat)
                                 .overlay(
@@ -70,8 +74,9 @@ struct StatisticsView: View {
         }
     }
 
+    // Modify displayedStatistics to use `amount`
     private var displayedStatistics: [String] {
-        statistics.filter { !hiddenStatistics.contains($0) }.prefix(2).map { $0 }
+        statistics.filter { !hiddenStatistics.contains($0) }.prefix(amount).map { $0 }
     }
 
     private func showDetails(for stat: String) {
