@@ -109,41 +109,40 @@ struct WishListFolderAddView: View {
                     .cornerRadius(40)
                     .padding(.horizontal)
                     .textFieldStyle(PlainTextFieldStyle())
-                
-                Button(action: {
-                    wishlist.rename(wishlistTitle)
-                    modelContext.insert(wishlist)
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    Text("등록")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(width: 120, height: 40)
-                        .background(Color.red)
-                        .cornerRadius(40)
+                HStack{
+                    Button(action: {
+                        wishlist.rename(wishlistTitle)
+                        modelContext.insert(wishlist)
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("등록")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(width: 120, height: 40)
+                            .background(Color.red)
+                            .cornerRadius(40)
+                    }
+                    .disabled(wishlistTitle.isEmpty)
+                                    
+                    Button(action: {
+                        isPickerPresented.toggle()
+                    }) {
+                        Text(isLoaded)
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(width: 160, height: 40)
+                            .background(Color.red)
+                            .cornerRadius(40)
+                    }
+                    .padding()
+                    .sheet(isPresented: $isPickerPresented) {
+                        DocumentPicker(selectedFileContent: $wishlist, isLoaded: $isLoaded)
+                        
+                    }
+                    .disabled(isLoaded == "불러오기 완료")
                 }
-                .padding(.horizontal)
-                .disabled(wishlistTitle.isEmpty)
-                                
-                Button(action: {
-                    isPickerPresented.toggle()
-                }) {
-                    Text(isLoaded)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(width: 160, height: 40)
-                        .background(Color.red)
-                        .cornerRadius(40)
-                }
-                .padding()
-                .sheet(isPresented: $isPickerPresented) {
-                    DocumentPicker(selectedFileContent: $wishlist, isLoaded: $isLoaded)
-                    
-                }
-                .padding(.horizontal)
-                .disabled(isLoaded == "불러오기 완료")
             }
         }
     }
@@ -212,32 +211,44 @@ struct WishListView: View {
                         }
                         .sheet(isPresented: $showAlert) {
                             VStack {
-                                Text("새로운 제목을 입력하세요")
-                                    .font(.headline)
+                                Text("위시리스트 제목 수정")
                                     .padding()
+                                    .font(.system(size:24))
 
                                 // 새로운 제목을 입력받을 TextField
                                 TextField("새로운 제목을 입력하세요", text: $newTitle)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .padding()
+                                
+                                HStack{
+                                    // 제목을 수정하는 버튼
+                                    Button("수정하기") {
+                                        if !newTitle.isEmpty {
+                                            // 새로운 제목으로 업데이트
+                                            wishList.rename(newTitle)
+                                            showAlert = false // Sheet 닫기
+                                        }
+                                    }
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .frame(width: 120, height: 40)
+                                    .background(Color.red)
+                                    .cornerRadius(40)
+                                    .foregroundColor(.red)
+                                    .padding()
 
-                                // 제목을 수정하는 버튼
-                                Button("수정하기") {
-                                    if !newTitle.isEmpty {
-                                        // 새로운 제목으로 업데이트
-                                        wishList.rename(newTitle)
+                                    // 취소 버튼
+                                    Button("취소") {
                                         showAlert = false // Sheet 닫기
                                     }
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .frame(width: 120, height: 40)
+                                    .background(Color.red)
+                                    .cornerRadius(40)
+                                    .foregroundColor(.red)
+                                    .padding()
                                 }
-                                .foregroundColor(.red)
-                                .padding()
-
-                                // 취소 버튼
-                                Button("취소") {
-                                    showAlert = false // Sheet 닫기
-                                }
-                                .foregroundColor(.red)
-                                .padding()
                             }
                             .padding()
                         }

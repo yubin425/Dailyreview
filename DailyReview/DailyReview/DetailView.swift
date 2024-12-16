@@ -151,8 +151,9 @@ private struct WishlistAndReviewButtons: View {
                             folders.first!.addMovie(movie.toStorage())
                         } else {
                             let firstWLName = "wishlist"
+                            let newWL = WishListFolder(name: firstWLName)
+                            newWL.addMovie(movie.toStorage())
                             modelContext.insert(WishListFolder(name: firstWLName))
-                            folders.first!.addMovie(movie.toStorage())
                         }
                     }) {
                         Image(systemName: "heart.fill")
