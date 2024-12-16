@@ -11160,3 +11160,18 @@ footer a:hover, footer a:active, footer a:focus {
     max-width: 17rem;
   }
 }
+
+.team-member-box {
+  background-color: white;
+  max-width: 350px;
+  width: 100%;
+}
+.team-member-box img {
+  object-fit: cover;
+}
+.shadow-lg {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.rounded {
+  border-radius: 12px;
+}
