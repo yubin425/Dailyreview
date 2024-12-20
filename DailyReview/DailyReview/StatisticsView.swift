@@ -92,6 +92,11 @@ struct StatisticsView: View {
     private static func generateStatistics(reviews: [Review]) -> [String] {
         var stats: [String] = []
         
+        if reviews.isEmpty {
+                stats.append("아직 리뷰가 작성되지 않았어요.")
+                return stats
+            }
+        
         let watchedThisMonth = moviesWatchedThisMonth(reviews: reviews)
         stats.append("이번 달에 본 영화 갯수는 \(watchedThisMonth)개에요")
         

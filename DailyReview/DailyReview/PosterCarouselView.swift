@@ -38,15 +38,25 @@ struct PosterCarouselView: UIViewControllerRepresentable {
             return !posterURL.isEmpty
         }
 
-        if filteredReviews.count < 5 {
-            let dummyCount = 5 - filteredReviews.count
-            for _ in 0..<dummyCount {
-                let movie1 = Movie(id: UUID(), title: "Inception", director: ["Christopher Nolan"], releaseYear: "2010", poster: "https://marketplace.canva.com/EAFTl0ixW_k/1/0/1131w/canva-black-white-minimal-alone-movie-poster-YZ-0GJ13Nc8.jpg", genre: ["Sci-Fi", "Action"], keyword: ["dream", "mind-bending"], plotText: "A thief who steals corporate secrets through the use of dream-sharing technology is given the task of planting an idea into the mind of a CEO.", actor: ["Leonardo DiCaprio", "Joseph Gordon-Levitt"])
-                let movieStorage1 = movie1.toStorage()
-                let review1 = Review(movieStorage: movieStorage1, reviewText: "Mind-blowing and intense!", rating: 5, watchDate: Date(), watchLocation: "Cinema A", friends: "John, Sarah")
-                filteredReviews.append(review1)
-            }
-        }
+        if filteredReviews.count <= 0 {
+                    let placeholderViewController = UIViewController()
+                    placeholderViewController.view.backgroundColor = .systemBackground
+                    let label = UILabel()
+                    label.text = "리뷰를 작성해주세요"
+                    label.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+                    label.textColor = .gray
+                    label.textAlignment = .center
+                    label.translatesAutoresizingMaskIntoConstraints = false
+                    
+                    placeholderViewController.view.addSubview(label)
+                    NSLayoutConstraint.activate([
+                        label.centerXAnchor.constraint(equalTo: placeholderViewController.view.centerXAnchor),
+                        label.centerYAnchor.constraint(equalTo: placeholderViewController.view.centerYAnchor)
+                    ])
+                    
+                    let navigationController = UINavigationController(rootViewController: placeholderViewController)
+                    return navigationController
+                }
         
         // Create the view controller with the passed navigation controller
         let viewController = HighlightingCollectionViewController(reviews: filteredReviews, navController: context.coordinator.navigationController!)
