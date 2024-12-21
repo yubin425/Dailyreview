@@ -62,8 +62,9 @@ struct WishListFolderView: View {
                             .padding()
                     } else {
                         List {
-                            ForEach(folders.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }) { folder in
-                                NavigationLink(destination: WishListView(wishList: folder)) {
+                            ForEach(folders
+                                .filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }
+                                .sorted { $0.order < $1.order }) { folder in                                NavigationLink(destination: WishListView(wishList: folder)) {
                                     HStack {
                                         AsyncImageView(_URL: folder.getPoster())
                                             .scaledToFit()
@@ -76,6 +77,9 @@ struct WishListFolderView: View {
                         }
                         .scrollContentBackground(.hidden) // 기본 배경 숨기고
                         .background(Color.gray.opacity(0.1)) // 원하는 배경색 적용
+                        .toolbar{
+                            EditButton()
+                        }
                     }
                 }
                 Spacer()
@@ -99,7 +103,8 @@ struct WishListFolderAddView: View {
     @State private var wishlist: WishListFolder = WishListFolder(name:"Empty")
     @State private var isLoaded = "불러오기"
     @State private var isPickerPresented = false
-
+    @Query private var folders: [WishListFolder]
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -111,8 +116,16 @@ struct WishListFolderAddView: View {
                     .textFieldStyle(PlainTextFieldStyle())
                 HStack{
                     Button(action: {
+                        let lastFolder = folders.sorted { $0.order < $1.order }.last
+                        let newOrder = (lastFolder?.order ?? -1) + 1
+                        wishlist.reorder(newOrder)
                         wishlist.rename(wishlistTitle)
                         modelContext.insert(wishlist)
+                        do {
+                            try modelContext.save() // Core Data에 변경 사항 저장
+                        } catch {
+                            print("Failed to save the updated order: \(error.localizedDescription)")
+                        }
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Text("등록")
@@ -170,6 +183,7 @@ struct WishListView: View {
                             }
                         }
                         .onDelete(perform: deleteMovie)
+                        .onMove(perform: moveMovie)     // Move action
                     }
                     .scrollContentBackground(.hidden) // 기본 배경 숨기고
                     .background(Color.gray.opacity(0.1)) // 원하는 배경색 적용
@@ -259,11 +273,14 @@ struct WishListView: View {
             }
         }
     }
-
     private func deleteMovie(at offsets: IndexSet) {
         for index in offsets {
             let movie = wishList.movies[index]
             wishList.removeMovie(movie)
         }
+    }
+    
+    private func moveMovie(from source: IndexSet, to destination: Int) {
+        wishList.movies.move(fromOffsets: source, toOffset: destination)
     }
 }

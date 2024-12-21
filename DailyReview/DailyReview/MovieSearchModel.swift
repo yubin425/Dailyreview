@@ -29,7 +29,14 @@ class MovieSearchModel: ObservableObject {
                 }
             }, receiveValue: { [weak self] response in
                 // 응답 데이터를 기반으로 movies 배열을 업데이트
+                // 포스터가 있는 영화들을 먼저 배치하도록 정렬
                 self?.movies = response.Data.flatMap { $0.Result }
+                    .sorted { movie1, movie2 in
+                        // 포스터가 nil이 아니고 빈 문자열도 아닌 경우 먼저 오도록 정렬
+                        let hasPoster1 = !(movie1.poster?.isEmpty ?? true)
+                        let hasPoster2 = !(movie2.poster?.isEmpty ?? true)
+                        return hasPoster1 && !hasPoster2
+                    }
             })
     }
 }
