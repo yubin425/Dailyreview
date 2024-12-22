@@ -63,8 +63,7 @@ struct WishListFolderView: View {
                     } else {
                         List {
                             ForEach(folders
-                                .filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }
-                                .sorted { $0.order < $1.order }) { folder in                                NavigationLink(destination: WishListView(wishList: folder)) {
+                                .filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }){ folder in   NavigationLink(destination: WishListView(wishList: folder)) {
                                     HStack {
                                         AsyncImageView(_URL: folder.getPoster())
                                             .scaledToFit()
@@ -116,15 +115,12 @@ struct WishListFolderAddView: View {
                     .textFieldStyle(PlainTextFieldStyle())
                 HStack{
                     Button(action: {
-                        let lastFolder = folders.sorted { $0.order < $1.order }.last
-                        let newOrder = (lastFolder?.order ?? -1) + 1
-                        wishlist.reorder(newOrder)
                         wishlist.rename(wishlistTitle)
                         modelContext.insert(wishlist)
                         do {
                             try modelContext.save() // Core Data에 변경 사항 저장
                         } catch {
-                            print("Failed to save the updated order: \(error.localizedDescription)")
+                            print("Failed to save")
                         }
                         presentationMode.wrappedValue.dismiss()
                     }) {
