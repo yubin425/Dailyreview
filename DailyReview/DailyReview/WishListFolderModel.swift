@@ -13,14 +13,20 @@ class WishListFolder:Identifiable {
     @Attribute(.unique) var id: UUID
     var name: String
     var movies: [MovieStorage] = []
-    
-    init(name: String) {
+    var order: Int16 // 순서 속성 추가
+
+    init(name: String, order: Int16 = 0) {
         self.id = UUID()
         self.name = name
+        self.order = order
     }
     
     func rename(_ name: String){
         self.name = name
+    }
+    
+    func reorder(_ order: Int16) {
+        self.order = order
     }
     
     func addMovie(_ movie: MovieStorage) {
