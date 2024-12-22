@@ -19,20 +19,20 @@ struct DetailView: View {
     var body: some View {
         ZStack(alignment: .top) {
             GeometryReader { geometry in
-                MovieStillView(stillURL: movie.still, geometry: geometry)
+                MovieStillView(stillURL: movie.still, geometry: geometry, isDarkMode: isDarkMode)
             }
             ScrollView {
                 VStack(alignment: .center, spacing: 16) {
-                    MovieTitleView(movie: movie)
+                    MovieTitleView(movie: movie, isDarkMode: isDarkMode)
                     MovieDetailsView(
                         movie: movie,
                         fromWishlist: fromWishlist,
                         folders: folders,
                         modelContext: modelContext,
                         selectWishlist: $selectWishlist,
-                        isExpanded: $isExpanded
+                        isExpanded: $isExpanded,
+                        isDarkMode: isDarkMode
                     )
-                    
                     Spacer()
                 }
             }
@@ -44,6 +44,7 @@ struct DetailView: View {
 private struct MovieStillView: View {
     var stillURL: String?
     var geometry: GeometryProxy
+    var isDarkMode: Bool
 
     var body: some View {
         if let stillURL = stillURL, !stillURL.isEmpty {
@@ -53,7 +54,7 @@ private struct MovieStillView: View {
                 .clipped()
         } else {
             LinearGradient(
-                gradient: Gradient(colors: [Color.red,Color.white]),
+                gradient: Gradient(colors: isDarkMode ? [Color.red, Color.black] : [Color.red, Color.white]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -64,11 +65,12 @@ private struct MovieStillView: View {
 
 private struct MovieTitleView: View {
     var movie: Movie
+    var isDarkMode: Bool
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             LinearGradient(
-                gradient: Gradient(colors: [Color.white.opacity(0.0), Color.white]),
+                gradient: Gradient(colors: [Color.white.opacity(0.0), isDarkMode ? Color.black : Color.white]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -78,7 +80,7 @@ private struct MovieTitleView: View {
             Text(movie.title)
                 .font(.title)
                 .fontWeight(.heavy)
-                .foregroundColor(Color.black)
+                .foregroundColor(isDarkMode ? Color.white : Color.black)
                 .multilineTextAlignment(.leading)
                 .padding(.leading, 16)
                 .padding(.top, 220)
@@ -94,6 +96,7 @@ private struct MovieDetailsView: View {
     var modelContext: ModelContext
     @Binding var selectWishlist: Bool
     @Binding var isExpanded: Bool
+    var isDarkMode: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -102,28 +105,24 @@ private struct MovieDetailsView: View {
                 fromWishlist: fromWishlist,
                 folders: folders,
                 modelContext: modelContext,
-                selectWishlist: $selectWishlist
+                selectWishlist: $selectWishlist,
+                isDarkMode: isDarkMode
             )
 
-            MovieHeaderView(movie: movie)
+            MovieHeaderView(movie: movie, isDarkMode: isDarkMode)
                 .padding(.horizontal)
             
-            
             if let plot = movie.plotText, !plot.isEmpty {
-                MoviePlotView(plot: plot, isExpanded: $isExpanded)
+                MoviePlotView(plot: plot, isExpanded: $isExpanded, isDarkMode: isDarkMode)
             }
 
             Spacer()
-            Spacer()
-            Spacer()
         }
-        .background(Color.white)
+        .background(isDarkMode ? Color.black : Color.white)
         .cornerRadius(16)
         .padding(.top, -50)
     }
 }
-
-
 
 private struct WishlistAndReviewButtons: View {
     var movie: Movie
@@ -131,88 +130,82 @@ private struct WishlistAndReviewButtons: View {
     var folders: [WishListFolder]
     var modelContext: ModelContext
     @Binding var selectWishlist: Bool
+    var isDarkMode: Bool
 
     var body: some View {
-        
-            HStack {
-                Spacer()
-                
-                NavigationLink(destination: ReviewView(movie: movie)) {
-                    Image(systemName: "doc.text")
+        HStack {
+            Spacer()
+            NavigationLink(destination: ReviewView(movie: movie)) {
+                Image(systemName: "doc.text")
+                    .font(.headline)
+                    .foregroundColor(isDarkMode ? Color.white : Color.black)
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            if fromWishlist != true {
+                Button(action: {
+                    if folders.count > 1 {
+                        selectWishlist = true
+                    } else if folders.count == 1 {
+                        folders.first!.addMovie(movie.toStorage())
+                    } else {
+                        let firstWLName = "wishlist"
+                        let newWL = WishListFolder(name: firstWLName)
+                        newWL.addMovie(movie.toStorage())
+                        modelContext.insert(WishListFolder(name: firstWLName))
+                    }
+                }) {
+                    Image(systemName: "heart.fill")
                         .font(.headline)
+                        .foregroundColor(isDarkMode ? Color.white : Color.black)
                 }
                 .buttonStyle(PlainButtonStyle())
-                
-                if fromWishlist != true {
-                    Button(action: {
-                        if folders.count > 1 {
-                            selectWishlist = true
-                        } else if folders.count == 1 {
-                            folders.first!.addMovie(movie.toStorage())
-                        } else {
-                            let firstWLName = "wishlist"
-                            let newWL = WishListFolder(name: firstWLName)
-                            newWL.addMovie(movie.toStorage())
-                            modelContext.insert(WishListFolder(name: firstWLName))
-                        }
-                    }) {
-                        Image(systemName: "heart.fill")
-                            .font(.headline)
-                            .foregroundColor(Color.black)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .confirmationDialog(
-                        "Select WishList",
-                        isPresented: $selectWishlist,
-                        titleVisibility: .visible
-                    ) {
-                        ForEach(folders, id: \.id) { folder in
-                            Button(folder.name) {
-                                folder.addMovie(movie.toStorage())
-                            }
+                .confirmationDialog(
+                    "Select WishList",
+                    isPresented: $selectWishlist,
+                    titleVisibility: .visible
+                ) {
+                    ForEach(folders, id: \.id) { folder in
+                        Button(folder.name) {
+                            folder.addMovie(movie.toStorage())
                         }
                     }
                 }
             }
-            .padding(.top)
-            .padding(.horizontal)
-            
-        
+        }
+        .padding(.top)
+        .padding(.horizontal)
     }
 }
 
 private struct MovieHeaderView: View {
     var movie: Movie
+    var isDarkMode: Bool
 
     var body: some View {
-        VStack{
+        VStack {
             HStack(spacing: 16) {
                 AsyncImageView(_URL: movie.poster)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 100)
                     .cornerRadius(8)
-                
                 Spacer()
-                
                 VStack(alignment: .leading, spacing: 8) {
                     Text(movie.title)
                         .font(.headline)
-                        .foregroundColor(Color.black)
+                        .foregroundColor(isDarkMode ? Color.white : Color.black)
                         .multilineTextAlignment(.leading)
-                    
                     Text("\(movie.director.first ?? "Unknown"), \(movie.releaseYear ?? "Unknown")")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
-                    
+                        .foregroundColor(isDarkMode ? Color.gray : Color.black)
                     Text(tags)
                         .font(.subheadline)
-                        .foregroundColor(Color.black)
+                        .foregroundColor(isDarkMode ? Color.gray : Color.black)
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
             }
             .padding(.horizontal)
-            
         }
         .padding(.horizontal)
     }
@@ -227,6 +220,7 @@ private struct MovieHeaderView: View {
 private struct MoviePlotView: View {
     var plot: String
     @Binding var isExpanded: Bool
+    var isDarkMode: Bool
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -234,13 +228,13 @@ private struct MoviePlotView: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(isExpanded ? nil : 3)
                 .font(.body)
-                .foregroundColor(Color.black)
+                .foregroundColor(isDarkMode ? Color.white : Color.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
 
             if !isExpanded {
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.black.opacity(0), .white]),
+                    gradient: Gradient(colors: [Color.black.opacity(0), isDarkMode ? Color.black : Color.white]),
                     startPoint: .center,
                     endPoint: .trailing
                 )

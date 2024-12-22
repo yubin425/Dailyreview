@@ -43,7 +43,7 @@ struct FullReviewView: View {
                             .clipped()
                     } else {
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.red,Color.white]), //스틸컷 없을 경우
+                            gradient: Gradient(colors: isDarkMode ? [Color.red,Color.black] : [Color.red,Color.white]), //스틸컷 없을 경우
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -58,7 +58,7 @@ struct FullReviewView: View {
                         ZStack(alignment: .topLeading) {
                             // Gradient background with opacity effect
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.white.opacity(0.0), Color.white]),
+                                gradient: Gradient(colors: isDarkMode ? [Color.black.opacity(0.0),Color.black] : [Color.white.opacity(0.0), Color.white]),
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -69,17 +69,12 @@ struct FullReviewView: View {
                                 Text(review.movieStorage.title)
                                     .font(.title)
                                     .fontWeight(.heavy)
-                                    .foregroundColor(Color.black)
+                                    .foregroundColor(isDarkMode ? Color.white : Color.black)
                                     .multilineTextAlignment(.leading)
                                     .padding(.leading, 16)
                                     .padding(.top, 220)
                                     .lineLimit(1)
-//                                    .lineLimit(isExpanded ? nil : 1)
-//                                Button(action: { isExpanded.toggle() }) {
-//                                    Text(isExpanded ? "접기" : "...더보기")
-//                                        .font(.caption)
-//                                        .foregroundColor(.red)
-//                                }
+
                             }
                                 
                         }
@@ -100,7 +95,7 @@ struct FullReviewView: View {
                                 }) {
                                     Image(systemName: "trash.fill")
                                         .font(.headline)
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(isDarkMode ? Color.white : Color.black)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 .alert(isPresented: $showDeleteAlert) {
@@ -121,7 +116,7 @@ struct FullReviewView: View {
                             // 유저의 리뷰 작성 항목을 포함
                             ReviewDetailsView(review: review)
                         }
-                        .background(Color.white)
+                        .background(isDarkMode ? Color.black : Color.white)
                         .cornerRadius(16)
                         //.padding(.horizontal)
                         .padding(.top, -50)
@@ -139,6 +134,7 @@ struct FullReviewView: View {
 struct ReviewHeaderContentView: View {
     let review: Review
     @State private var isExpanded = false // 줄거리 더보기 토글
+    @AppStorage("isDarkMode") private var isDarkMode = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -155,7 +151,7 @@ struct ReviewHeaderContentView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(review.movieStorage.title)
                         .font(.headline)
-                        .foregroundColor(Color.black)
+                        .foregroundColor(isDarkMode ? Color.white : Color.black)
                         .multilineTextAlignment(.leading)
 
                     Text("\(review.movieStorage.director.first ?? "Unknown"), \(review.movieStorage.releaseYear ?? "Unknown")")
@@ -168,7 +164,7 @@ struct ReviewHeaderContentView: View {
                     // Tags
                     Text(Tags)
                         .font(.subheadline)
-                        .foregroundColor(Color.black)
+                        .foregroundColor(isDarkMode ? Color.white : Color.black)
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
@@ -180,13 +176,13 @@ struct ReviewHeaderContentView: View {
                         .multilineTextAlignment(.leading)
                         .lineLimit(isExpanded ? nil : 3)
                         .font(.body)
-                        .foregroundColor(Color.black)
+                        .foregroundColor(isDarkMode ? Color.white : Color.black)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
 
                     if !isExpanded {
                         LinearGradient(
-                            gradient: Gradient(colors: [Color.white.opacity(0), Color.white]),
+                            gradient: Gradient(colors: isDarkMode ? [Color.black.opacity(0), Color.black] : [Color.white.opacity(0), Color.white]),
                             startPoint: .center,
                             endPoint: .trailing
                         )
@@ -306,6 +302,7 @@ struct EditReviewView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss // 이전 화면으로 복귀를 위한 dismiss 환경 변수
+    @Environment(\.colorScheme) private var colorScheme
 
     // 로컬 상태
     @State private var reviewText = ""
@@ -343,10 +340,11 @@ struct EditReviewView: View {
 
     var body: some View {
         NavigationStack {
-            // 이미지 및 영화 기본 정보
-            movieHeaderView()
             ScrollView {
                 VStack {
+                    
+                    // 이미지 및 영화 기본 정보
+                    movieHeaderView()
 
                     // 기본 정보 입력
                     reviewDetailsForm()
@@ -378,6 +376,7 @@ struct EditReviewView: View {
 
     // MARK: - Subviews
     
+    
     @ViewBuilder
     private func movieHeaderView() -> some View {
         GeometryReader { geometry in
@@ -386,7 +385,10 @@ struct EditReviewView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geometry.size.width, height: 270)
                     .clipped()
-                    .overlay(Color.white.opacity(0.7))
+                    .overlay(
+                        Color(colorScheme == .dark ? .black : .white)
+                            .opacity(0.7) // 다크 모드에 따라 색상 반전
+                    )
                     .overlay(
                         VStack(alignment: .center) {
                             HStack {
@@ -399,18 +401,19 @@ struct EditReviewView: View {
                                 VStack {
                                     Text("\(review.movieStorage.title)")
                                         .font(.title)
-                                        .foregroundColor(Color.black)
+                                        .foregroundColor(colorScheme == .dark ? .white : .black) // 다크 모드 색상
                                         .multilineTextAlignment(.center)
                                         .padding(.bottom, 5)
                                     
                                     Text("\(String(review.movieStorage.director.first ?? "null")),\(String(review.movieStorage.releaseYear ?? "null"))")
+                                        .foregroundColor(colorScheme == .dark ? .gray : .black) // 텍스트 색상 반전
                                     
                                     HStack {
                                         ForEach(1...5, id: \.self) { index in
                                             Image(systemName: index <= rating ? "star.fill" : "star")
                                                 .resizable()
                                                 .frame(width: 30, height: 30)
-                                                .foregroundColor(index <= rating ? .orange : .black)
+                                                .foregroundColor(index <= rating ? .orange : (colorScheme == .dark ? .white : .black))
                                                 .onTapGesture {
                                                     rating = index
                                                 }
@@ -420,10 +423,12 @@ struct EditReviewView: View {
                                     Text("출연자:\(String(review.movieStorage.actor.first ?? "null"))")
                                         .lineLimit(1)
                                         .truncationMode(.tail)
+                                        .foregroundColor(colorScheme == .dark ? .gray : .black)
                                     
                                     Text(Tags)
                                         .lineLimit(1)
                                         .truncationMode(.tail)
+                                        .foregroundColor(colorScheme == .dark ? .gray : .black)
                                     
                                 }
                                 .padding(.horizontal)
@@ -432,7 +437,7 @@ struct EditReviewView: View {
                     )
             }
         }
-        .background(Color.white.opacity(0.3))
+        .background(Color(colorScheme == .dark ? .black : .white).opacity(0.3))
         .padding(.vertical)
         .frame(height: 300)
     }
@@ -584,29 +589,30 @@ struct EditReviewView: View {
     }
     
     @ViewBuilder
-    private func actionButtons() -> some View {
-        HStack {
-            Button("저장") {
-                saveChanges()
-                dismiss()
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.red.opacity(0.7))
-            .foregroundColor(.white)
-            .cornerRadius(8)
-            
-            Button("취소") {
-                dismiss()
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.gray.opacity(0.7))
-            .foregroundColor(.white)
-            .cornerRadius(8)
-        }
-        .padding()
-    }
+     private func actionButtons() -> some View {
+         HStack {
+             Button("저장") {
+                 saveChanges()
+                 dismiss()
+             }
+             .frame(maxWidth: .infinity)
+             .padding()
+             .background(Color.red.opacity(0.7))
+             .foregroundColor(.white)
+             .cornerRadius(8)
+             
+             Button("취소") {
+                 dismiss()
+             }
+             .frame(maxWidth: .infinity)
+             .padding()
+             .background(Color.gray.opacity(0.7))
+             .foregroundColor(colorScheme == .dark ? .black : .white)
+             .cornerRadius(8)
+         }
+         .padding()
+     }
+
     
     
 

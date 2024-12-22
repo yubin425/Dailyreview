@@ -83,31 +83,32 @@ struct ReviewView: View {
 
     var body: some View {
         NavigationStack {
-            VStack{
-            ScrollView {
-                movieHeaderView()
+            VStack {
+                ScrollView {
+                    movieHeaderView()
 
-                VStack {
-                    reviewDetailsForm()
-                    
-                    Divider()
+                    VStack {
+                        reviewDetailsForm()
 
-                    customFieldsSection()
-                    
-                    Divider()
+                        Divider()
 
-                    reviewTextEditor()
-                    
-                    Divider()
+                        customFieldsSection()
 
-                    Spacer()
+                        Divider()
 
+                        reviewTextEditor()
+
+                        Divider()
+
+                        Spacer()
+                    }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
-            }
-            .onAppear {
-                fetchSavedLayouts()
-            }
+                .background(Color(.systemBackground))
+                .onAppear {
+                    fetchSavedLayouts()
+                }
+
                 actionButtons()
             }
             .navigationDestination(isPresented: $navigateToFullReview) {
@@ -132,11 +133,11 @@ extension ReviewView {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: geometry.size.width, height: 270)
                     .clipped()
-                    .overlay(Color.white.opacity(0.7))
+                    .overlay(Color.black.opacity(0.7))
                     .overlay(movieHeaderOverlay())
             }
         }
-        .background(Color.white.opacity(0.3))
+        .background(Color.black.opacity(0.3))
         .padding(.vertical)
         .frame(height: 300)
     }
@@ -154,18 +155,19 @@ extension ReviewView {
                 VStack {
                     Text(movie.title.splitWord())
                         .font(.title)
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                         .multilineTextAlignment(.leading)
                         .padding(.bottom, 5)
 
                     Text("\(movie.director.first ?? "null"), \(movie.releaseYear ?? "null")")
+                        .foregroundColor(.white)
 
                     HStack {
                         ForEach(1...5, id: \.self) { index in
                             Image(systemName: index <= rating ? "star.fill" : "star")
                                 .resizable()
                                 .frame(width: 30, height: 30)
-                                .foregroundColor(index <= rating ? .orange : .black)
+                                .foregroundColor(index <= rating ? .orange : .gray)
                                 .onTapGesture {
                                     rating = index
                                 }
@@ -177,12 +179,14 @@ extension ReviewView {
 
             HStack {
                 Text("출연자: \(movie.actor.first ?? "null")")
+                    .foregroundColor(.white)
                     .lineLimit(1)
                     .truncationMode(.tail)
 
                 Spacer()
 
                 Text(Tags)
+                    .foregroundColor(.white)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
@@ -196,10 +200,12 @@ extension ReviewView {
         VStack(alignment: .leading) {
             Text("기본 정보")
                 .font(.headline)
+                .foregroundColor(.primary)
                 .padding(.top)
 
             HStack {
                 Text("📅 날짜")
+                    .foregroundColor(.primary)
                 Divider()
                 DatePicker("", selection: $watchDate, displayedComponents: .date)
                     .labelsHidden()
@@ -207,16 +213,20 @@ extension ReviewView {
 
             HStack {
                 Text("📍 위치")
+                    .foregroundColor(.primary)
                 Divider()
                 TextField("영화를 본 위치", text: $watchLocation)
                     .textFieldStyle(PlainTextFieldStyle())
+                    .foregroundColor(.primary)
             }
 
             HStack {
                 Text("👥 사람")
+                    .foregroundColor(.primary)
                 Divider()
                 TextField("영화를 같이 본 사람", text: $friends)
                     .textFieldStyle(PlainTextFieldStyle())
+                    .foregroundColor(.primary)
             }
         }
         .padding(.horizontal)
@@ -227,11 +237,13 @@ extension ReviewView {
         VStack(alignment: .leading) {
             Text("커스텀 정보")
                 .font(.headline)
+                .foregroundColor(.primary)
                 .padding(.top)
 
             HStack {
                 Text("레이아웃:")
                     .font(.body)
+                    .foregroundColor(.primary)
                 Picker("레이아웃 선택", selection: $selectedLayout) {
                     Text("선택된 레이아웃 없음").tag(nil as CustomFieldLayout?)
                     ForEach(savedLayouts, id: \.id) { layout in
@@ -252,9 +264,11 @@ extension ReviewView {
             ForEach($customFields) { $field in
                 HStack {
                     TextField("필드 이름", text: $field.name)
+                        .foregroundColor(.primary)
                     Divider()
                     TextField("값을 입력하세요", text: $field.value)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .foregroundColor(.primary)
 
                     Button(action: {
                         if let index = customFields.firstIndex(where: { $0.id == field.id }) {
@@ -271,13 +285,13 @@ extension ReviewView {
             HStack {
                 TextField("새 항목 이름 입력", text: $newFieldName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .foregroundColor(.primary)
                 Button("추가") {
                     addCustomField()
                 }
                 .foregroundColor(.red)
             }
             .padding(.top)
-
 
             HStack {
                 if !customFields.isEmpty {
@@ -311,28 +325,22 @@ extension ReviewView {
                 .font(.headline)
                 .padding(.top)
                 .padding(.horizontal)
-            
-            TextEditor(text: $reviewText)
-                .padding(.horizontal)
-                .frame(minHeight: 100, maxHeight: .infinity, alignment: .topLeading)
-                .onAppear {
-                    UITextView.appearance().backgroundColor = .clear // 배경색 제거
+
+            ZStack(alignment: .topLeading) {
+                if reviewText.isEmpty {
+                    Text("상세한 리뷰 내용을 자유롭게 입력하세요")
+                        .foregroundColor(.gray)
+                        .padding(.top, 10)
+                        .padding(.leading, 5)
                 }
-                .overlay(
-                    // TextEditor가 비어있을 때 placeholder 텍스트 표시
-                    Group {
-                        if reviewText.isEmpty {
-                            Text("상세한 리뷰 내용을 자유롭게 입력하세요")
-                                .foregroundColor(.gray)
-                                .padding(.top, 10) // 텍스트 위치 조정
-                                .padding(.leading, 19)
-                        }
-                    }
-                    , alignment: .topLeading
-                )
+                TextEditor(text: $reviewText)
+                    .padding(.horizontal)
+                    .frame(minHeight: 100, maxHeight: .infinity, alignment: .topLeading)
+                    .background(Color.clear) // TextEditor 배경 제거
+            }
+            .animation(.easeInOut, value: reviewText.isEmpty)
+            .padding(.vertical)
         }
-        .animation(.easeInOut, value: showReviewField)
-        .padding(.vertical)
     }
 
     @ViewBuilder
@@ -388,7 +396,6 @@ extension ReviewView {
         customFields = []
     }
 }
-
 // MARK: - Helper Methods
 
 extension ReviewView {

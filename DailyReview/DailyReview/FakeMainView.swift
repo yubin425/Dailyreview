@@ -12,6 +12,7 @@ struct FakeMainView: View {
     @Query private var reviews: [Review]
     @State private var searchText = ""
     @State private var showSearchView = false
+    @AppStorage("isDarkMode") private var isDarkMode = false
     
 
     var body: some View {
@@ -25,7 +26,7 @@ struct FakeMainView: View {
                                 .frame(height: 500)
                             
                             HStack{
-                                Image("Logo")
+                                Image(isDarkMode ? "LogoDark" : "Logo")
                                     .resizable()
                                     .frame(width:87, height:45)
                                     .padding()
