@@ -13,7 +13,7 @@ struct FakeMainView: View {
     @State private var searchText = ""
     @State private var showSearchView = false
     @AppStorage("isDarkMode") private var isDarkMode = false
-    
+    @State private var refreshID = UUID()
 
     var body: some View {
         NavigationStack {
@@ -51,6 +51,9 @@ struct FakeMainView: View {
                     }
                 }
             }
+        }
+        .onChange(of: reviews) { _ in
+            refreshID = UUID() // Trigger a view refresh when the reviews array changes.
         }
     }
 }
