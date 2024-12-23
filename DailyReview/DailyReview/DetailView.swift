@@ -255,3 +255,4 @@ private struct MoviePlotView: View {
         .padding(.horizontal)
     }
 }
+
