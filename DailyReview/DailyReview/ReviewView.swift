@@ -325,22 +325,28 @@ extension ReviewView {
                 .font(.headline)
                 .padding(.top)
                 .padding(.horizontal)
-
-            ZStack(alignment: .topLeading) {
-                if reviewText.isEmpty {
-                    Text("상세한 리뷰 내용을 자유롭게 입력하세요")
-                        .foregroundColor(.gray)
-                        .padding(.top, 10)
-                        .padding(.leading, 5)
+            
+            TextEditor(text: $reviewText)
+                .padding(.horizontal)
+                .frame(minHeight: 100, maxHeight: .infinity, alignment: .topLeading)
+                .onAppear {
+                    UITextView.appearance().backgroundColor = .clear // 배경색 제거
                 }
-                TextEditor(text: $reviewText)
-                    .padding(.horizontal)
-                    .frame(minHeight: 100, maxHeight: .infinity, alignment: .topLeading)
-                    .background(Color.clear) // TextEditor 배경 제거
-            }
-            .animation(.easeInOut, value: reviewText.isEmpty)
-            .padding(.vertical)
+                .overlay(
+                    // TextEditor가 비어있을 때 placeholder 텍스트 표시
+                    Group {
+                        if reviewText.isEmpty {
+                            Text("상세한 리뷰 내용을 자유롭게 입력하세요")
+                                .foregroundColor(.gray)
+                                .padding(.top, 10) // 텍스트 위치 조정
+                                .padding(.leading, 19)
+                        }
+                    }
+                    , alignment: .topLeading
+                )
         }
+        .animation(.easeInOut, value: showReviewField)
+        .padding(.vertical)
     }
 
     @ViewBuilder
