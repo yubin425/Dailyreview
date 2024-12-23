@@ -67,13 +67,18 @@ struct StatisticsView: View {
             mostWatchedGenre()
             hiddenStatistics.removeAll()
         }
+        .onChange(of: allReviews) { newReviews in
+            updateStatistics(with: newReviews)
+        }
         .sheet(isPresented: $showModal) {
             if let selectedStatistic = selectedStatistic {
                 StatisticDetailView(statistic: selectedStatistic, reviews: allReviews)
             }
         }
     }
-
+    private func updateStatistics(with reviews: [Review]) {
+        statistics = StatisticsView.generateStatistics(reviews: reviews)
+    }
     // Modify displayedStatistics to use `amount`
     private var displayedStatistics: [String] {
         statistics.filter { !hiddenStatistics.contains($0) }.prefix(amount).map { $0 }
